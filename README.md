@@ -6,7 +6,7 @@ I started an open source project called Enter SandMan that aimed at decompressin
 
 SandMan initially started as an open-source project, but in 2008 a German company called X-Ways stole[2][3][4] my open source code without giving any proper due credits. As a results, I stopped open sourcing my projects.
 
-2017 is now here, and I thought it would be a good way to start the year by open sourcing the current version of Hibr2Bin which also had been recently documented [5] by Joe T. Sylvea, Vico Marzialea, Golden G. Richard III.
+2017 is now here, and I thought it would be a good way to start the year by open sourcing the current version of Hibr2Bin which also had been recently documented [5] by Joe T. Sylve, Vico Marziale, Golden G. Richard III.
 
 - [1] http://www.msuiche.net/2007/12/06/enter-sandman-japan-pacsec-2007/
 - [2] http://lists.volatilesystems.com/pipermail/vol-users/2009-July/000111.html
