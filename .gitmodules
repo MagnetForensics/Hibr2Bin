@@ -1,0 +1,3 @@
+[submodule "common-lib-light"]
+	path = common-lib-light
+	url = https://github.com/comaeio/common-lib-light.git

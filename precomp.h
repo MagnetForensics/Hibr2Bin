@@ -33,8 +33,8 @@ Revision History:
 #define MAX_COMPRESSED_BLOCK_SIZE ((0x10 + 1) * PAGE_SIZE) // 64KB + 4KB)
 
 // public
-#include "FileContext.h"
-#include "Misc.h"
+#include "common-lib-light/FileContext.h"
+#include "common-lib-light/Misc.h"
 
 #include "Hiber.h"
 #include "MemoryBlocks.h"
