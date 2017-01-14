@@ -143,20 +143,20 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FileContext.cpp" />
+    <ClCompile Include="common-lib-light/FileContext.cpp" />
     <ClCompile Include="Hiberfil.cpp" />
     <ClCompile Include="Hibr2Bin.cpp" />
     <ClCompile Include="MemoryBlocks.cpp" />
     <ClCompile Include="Disk.cpp" />
-    <ClCompile Include="Misc.cpp" />
+    <ClCompile Include="common-lib-light/Misc.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FileContext.h" />
+    <ClInclude Include="common-lib-light/FileContext.h" />
     <ClInclude Include="Hiber.h" />
     <ClInclude Include="Hiberfil.h" />
     <ClInclude Include="Hibr2Bin.h" />
     <ClInclude Include="MemoryBlocks.h" />
-    <ClInclude Include="Misc.h" />
+    <ClInclude Include="common-lib-light/Misc.h" />
     <ClInclude Include="precomp.h" />
     <ClInclude Include="resource1.h" />
   </ItemGroup>
