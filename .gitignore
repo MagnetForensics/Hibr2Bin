@@ -1,0 +1,6 @@
+*.tlog
+*.obj
+*.log
+*.pch
+*.pdb
+precomp_src.c
