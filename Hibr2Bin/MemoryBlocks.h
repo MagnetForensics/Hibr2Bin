@@ -464,6 +464,11 @@ public:
     GetInitialOffset(
     );
 
+    ULONG64
+    GetFirstKernelRestorePage(
+        VOID
+        );
+
     MemoryRangeTable *GetFirstRangeTable() { return new MemoryRangeTable(GetContext(), m_InitialOffset); }
 
     MemoryNode *GetMemoryNodes() { return m_MemoryNodes; }

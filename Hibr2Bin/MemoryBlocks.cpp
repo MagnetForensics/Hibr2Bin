@@ -814,6 +814,48 @@ MemoryBlock::GetSignature(
 }
 
 ULONG64
+MemoryBlock::GetFirstKernelRestorePage(
+    VOID
+    )
+{
+    BYTE Header[PAGE_SIZE];
+    PVOID HeaderPointer = &Header;
+    ULONG64 FirstKernelRestorePage = NULL;
+
+    GetContext()->ReadFile(0, sizeof(Header), &HeaderPointer);
+
+    if (GetContext()->IsWin8AndAbove()) {
+
+        switch (GetContext()->GetPlatform()) {
+
+        case PlatformX86:
+        {
+            FirstKernelRestorePage = *(PULONG)&Header[0x54];
+
+            break;
+        }
+        case PlatformX64:
+        {
+            if (GetContext()->IsWin10()) {
+
+                FirstKernelRestorePage = *(PULONG64)&Header[0x70];
+            }
+            else {
+
+                FirstKernelRestorePage = *(PULONG64)&Header[0x68];
+            }
+
+            break;
+        }
+        }
+
+        return FirstKernelRestorePage * PAGE_SIZE;
+    }
+
+    return NULL;
+}
+
+ULONG64
 MemoryBlock::GetInitialOffset(
 )
 {

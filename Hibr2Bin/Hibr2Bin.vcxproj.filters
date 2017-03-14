@@ -4,9 +4,6 @@
     <ClCompile Include="Disk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="common-lib-light/FileContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hiberfil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -16,17 +13,17 @@
     <ClCompile Include="MemoryBlocks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="common-lib-light/Misc.cpp">
+    <ClCompile Include="precomp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="precomp.cpp">
+    <ClCompile Include="CommonLibLight/FileContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonLibLight/Misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common-lib-light/FileContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Hiber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,13 +36,16 @@
     <ClInclude Include="MemoryBlocks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common-lib-light/Misc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="precomp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonLibLight/FileContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonLibLight/Misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

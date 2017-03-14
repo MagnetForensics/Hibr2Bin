@@ -28,8 +28,11 @@ ProcessHiberfil(
     _Out_ MemoryBlock **OutMemoryBlock
 )
 {
-    ULONG j = 0;
     BOOLEAN Result = FALSE;
+    ULONG64 RestorePage[2];
+    ULONG TotalUncompressedPages = 0;
+    ULONG j = 0;
+    ULONG i;
 
     if (!Vars->HasPlatform || !Vars->HasMajorVersion ||
         !Vars->HasMinorVersion || !Vars->FileName ||
@@ -53,161 +56,172 @@ ProcessHiberfil(
     }
 
     if (Vars->HasDataOffset) {
+
         White(L"  Data offset:    0x%llx\n", Vars->DataOffset);
-        Base->SetInitialOffset(Vars->DataOffset);
+
+        RestorePage[0] = Vars->DataOffset;
     }
-    else
-    {
-        Base->SetInitialOffset(Base->GetInitialOffset());
+    else {
+
+        RestorePage[0] = Base->GetInitialOffset();
     }
 
-    MemoryRangeTable *RangeTable = Base->GetFirstRangeTable();
-    ULONG RangeTableIndex = 0;
-    ULONG TotalUncompressedPages = 0;
+    RestorePage[1] = Base->GetFirstKernelRestorePage();
 
-    wprintf(L"  ");
+    for (i = 0; i < _countof(RestorePage); i++) {
 
-    while (RangeTable->IsValid())
-    {
-        wprintf(L".");
-        // wprintf(L"Table #%d\n", j);
+        if (RestorePage[i]) {
 
-        CompressedMemoryBlock *CompressedBlock = new CompressedMemoryBlock(RangeTable->GetContext(), RangeTable->GetCompressedBlockOffset());
+            Base->SetInitialOffset(RestorePage[i]);
 
-        ULONG RangeCount = RangeTable->GetRangeCount();
-        if (RangeCount > 0x1FF)
-        {
-            Red(L"  Error: Invalid file format.\n");
-            break;
-        }
+            MemoryRangeTable *RangeTable = Base->GetFirstRangeTable();
+            ULONG RangeTableIndex = 0;
 
-        ULONG UncompressedPages = RangeTable->GetCompressedBlockIndex(RangeCount);
-        ULONG CompressedSize = RangeTable->GetCompressedSize();
-        DbgPrint(L"\nRangeTableIndex[%d] has %d ranges @ 0x%llx. Total blocks to be uncompressed: %d 0x%x (Size = 0x%x)- ",
-            RangeTableIndex, RangeCount, RangeTable->GetCompressedBlockOffset(),
-            UncompressedPages, UncompressedPages * PAGE_SIZE,
-            CompressedSize);
-        RangeTableIndex++;
+            wprintf(L"  ");
 
-        if (Base->GetContext()->IsWin8AndAbove())
-        {
-            if ((UncompressedPages == 0) || (UncompressedPages > MAX_HIBER_PAGES)) break;
-
-            if (RangeTable->GetCompressedSize() > MAX_COMPRESSED_BLOCK) break;
-        }
-        else
-        {
-            if (UncompressedPages == 0) break;
-        }
-
-        TotalUncompressedPages += UncompressedPages;
-
-        ULONG CompressedPageIndex = 0;
-
-        for (ULONG Index = 0; Index < RangeTable->GetRangeCount(); Index += 1)
-        {
-            MemoryRangeEntry *Entry = RangeTable->GetRangeEntry(Index);
-            ULONG64 StartPage = Entry->GetStartPage();
-            ULONG64 PageCount = Entry->GetPageCount();
-
-            DbgPrint(L"[0x%llx - 0x%llx] CompressedSize = 0x%x\n",
-                StartPage * PAGE_SIZE, (StartPage + PageCount) * PAGE_SIZE, RangeTable->GetCompressedSize());
-
-            if (CompressedPageIndex && ((CompressedPageIndex % 0x10) == 0)) CompressedBlock->GetNextCompressedBlock();
-
-            MEMORY_DESCRIPTOR MemDesc = { 0 };
-
-            MemDesc.IsCompressed = CompressedBlock->IsCompressed();
-            MemDesc.PageCount = (ULONG)PageCount;
-            MemDesc.Range.Minimum = StartPage * PAGE_SIZE;
-            MemDesc.Range.Maximum = MemDesc.Range.Minimum + (PageCount * PAGE_SIZE);
-            MemDesc.Compressed.XpressHeader = CompressedBlock->GetCompressedBlockOffset();
-
-            if (Base->GetContext()->IsWin8AndAbove())
+            while (RangeTable->IsValid())
             {
-                MemDesc.CompressedSize = RangeTable->GetCompressedSize();
-                MemDesc.Compressed.XpressIndex = (CompressedPageIndex % 0x10);
-                MemDesc.Compressed.CompressionMethod = RangeTable->GetCompressMethod();
-                MemDesc.NoHeader = 1;
+                wprintf(L".");
+                // wprintf(L"Table #%d\n", j);
 
-                if (MemDesc.Compressed.CompressionMethod != XpressFast)
+                CompressedMemoryBlock *CompressedBlock = new CompressedMemoryBlock(RangeTable->GetContext(), RangeTable->GetCompressedBlockOffset());
+
+                ULONG RangeCount = RangeTable->GetRangeCount();
+                if (RangeCount > 0x1FF)
                 {
-                    DbgPrint(L"Compression %d\n", RangeTable->GetCompressMethod());
-                }
-            }
-            else
-            {
-                if (!MemDesc.IsCompressed)
-                {
-                    MemDesc.Uncompressed.BaseOffset = CompressedBlock->GetCompressedBlockOffset();
-                    MemDesc.Uncompressed.BaseOffset += CompressedBlock->GetCompressedHeaderSize();
+                    Red(L"  Error: Invalid file format.\n");
+                    break;
                 }
 
-                MemDesc.Compressed.XpressIndex = (CompressedPageIndex % 0x10);
-                MemDesc.CompressedSize = CompressedBlock->GetCompressedBlockSize();
-            }
+                ULONG UncompressedPages = RangeTable->GetCompressedBlockIndex(RangeCount);
+                ULONG CompressedSize = RangeTable->GetCompressedSize();
+                DbgPrint(L"\nRangeTableIndex[%d] has %d ranges @ 0x%llx. Total blocks to be uncompressed: %d 0x%x (Size = 0x%x)- ",
+                    RangeTableIndex, RangeCount, RangeTable->GetCompressedBlockOffset(),
+                    UncompressedPages, UncompressedPages * PAGE_SIZE,
+                    CompressedSize);
+                RangeTableIndex++;
 
-            if (((CompressedPageIndex % 0x10) + PageCount) > 0x10)
-            {
-                //
-                // Split required.
-                //
-                ULONG LastCompressedBlockStartIndex = 0;
-                for (ULONG PageIndex = 0; PageIndex < PageCount; PageIndex += 1)
+                if (Base->GetContext()->IsWin8AndAbove())
                 {
-                    CompressedPageIndex += 1;
+                    if ((UncompressedPages == 0) || (UncompressedPages > MAX_HIBER_PAGES)) break;
 
-                    if (((CompressedPageIndex % 0x10) == 0) || ((PageIndex + 1) >= PageCount))
+                    if (RangeTable->GetCompressedSize() > MAX_COMPRESSED_BLOCK) break;
+                }
+                else
+                {
+                    if (UncompressedPages == 0) break;
+                }
+
+                TotalUncompressedPages += UncompressedPages;
+
+                ULONG CompressedPageIndex = 0;
+
+                for (ULONG Index = 0; Index < RangeTable->GetRangeCount(); Index += 1)
+                {
+                    MemoryRangeEntry *Entry = RangeTable->GetRangeEntry(Index);
+                    ULONG64 StartPage = Entry->GetStartPage();
+                    ULONG64 PageCount = Entry->GetPageCount();
+
+                    DbgPrint(L"[0x%llx - 0x%llx] CompressedSize = 0x%x\n",
+                        StartPage * PAGE_SIZE, (StartPage + PageCount) * PAGE_SIZE, RangeTable->GetCompressedSize());
+
+                    if (CompressedPageIndex && ((CompressedPageIndex % 0x10) == 0)) CompressedBlock->GetNextCompressedBlock();
+
+                    MEMORY_DESCRIPTOR MemDesc = { 0 };
+
+                    MemDesc.IsCompressed = CompressedBlock->IsCompressed();
+                    MemDesc.PageCount = (ULONG)PageCount;
+                    MemDesc.Range.Minimum = StartPage * PAGE_SIZE;
+                    MemDesc.Range.Maximum = MemDesc.Range.Minimum + (PageCount * PAGE_SIZE);
+                    MemDesc.Compressed.XpressHeader = CompressedBlock->GetCompressedBlockOffset();
+
+                    if (Base->GetContext()->IsWin8AndAbove())
                     {
-                        MemDesc.PageCount = ((PageIndex + 1) - LastCompressedBlockStartIndex);
-                        MemDesc.Range.Minimum = (StartPage + LastCompressedBlockStartIndex) * PAGE_SIZE;
-                        MemDesc.Range.Maximum = ((StartPage + LastCompressedBlockStartIndex) * PAGE_SIZE) + (MemDesc.PageCount * PAGE_SIZE);
-                        Base->GetMemoryNodes()->InsertNode(StartPage * PAGE_SIZE, &MemDesc);
+                        MemDesc.CompressedSize = RangeTable->GetCompressedSize();
+                        MemDesc.Compressed.XpressIndex = (CompressedPageIndex % 0x10);
+                        MemDesc.Compressed.CompressionMethod = RangeTable->GetCompressMethod();
+                        MemDesc.NoHeader = 1;
 
-                        //
-                        // Next block
-                        //
-                        LastCompressedBlockStartIndex = PageIndex + 1;
-                        if (((CompressedPageIndex % 0x10) == 0) && !((PageIndex + 1) >= PageCount))
+                        if (MemDesc.Compressed.CompressionMethod != XpressFast)
                         {
-                            //
-                            // Next Xpress block.
-                            // Make sure we still have another round to go to avoid a double GetNextCompressedBlock()
-                            //
-                            CompressedBlock->GetNextCompressedBlock();
-                            MemDesc.Compressed.XpressHeader = CompressedBlock->GetCompressedBlockOffset();
-                            MemDesc.IsCompressed = CompressedBlock->IsCompressed();
-                            if (!MemDesc.IsCompressed)
-                            {
-                                MemDesc.Uncompressed.BaseOffset = CompressedBlock->GetCompressedBlockOffset();
-                                MemDesc.Uncompressed.BaseOffset += CompressedBlock->GetCompressedHeaderSize();
-                            }
-                            MemDesc.CompressedSize = CompressedBlock->GetCompressedBlockSize();
+                            DbgPrint(L"Compression %d\n", RangeTable->GetCompressMethod());
+                        }
+                    }
+                    else
+                    {
+                        if (!MemDesc.IsCompressed)
+                        {
+                            MemDesc.Uncompressed.BaseOffset = CompressedBlock->GetCompressedBlockOffset();
+                            MemDesc.Uncompressed.BaseOffset += CompressedBlock->GetCompressedHeaderSize();
                         }
 
                         MemDesc.Compressed.XpressIndex = (CompressedPageIndex % 0x10);
+                        MemDesc.CompressedSize = CompressedBlock->GetCompressedBlockSize();
                     }
+
+                    if (((CompressedPageIndex % 0x10) + PageCount) > 0x10)
+                    {
+                        //
+                        // Split required.
+                        //
+                        ULONG LastCompressedBlockStartIndex = 0;
+                        for (ULONG PageIndex = 0; PageIndex < PageCount; PageIndex += 1)
+                        {
+                            CompressedPageIndex += 1;
+
+                            if (((CompressedPageIndex % 0x10) == 0) || ((PageIndex + 1) >= PageCount))
+                            {
+                                MemDesc.PageCount = ((PageIndex + 1) - LastCompressedBlockStartIndex);
+                                MemDesc.Range.Minimum = (StartPage + LastCompressedBlockStartIndex) * PAGE_SIZE;
+                                MemDesc.Range.Maximum = ((StartPage + LastCompressedBlockStartIndex) * PAGE_SIZE) + (MemDesc.PageCount * PAGE_SIZE);
+                                Base->GetMemoryNodes()->InsertNode(StartPage * PAGE_SIZE, &MemDesc);
+
+                                //
+                                // Next block
+                                //
+                                LastCompressedBlockStartIndex = PageIndex + 1;
+                                if (((CompressedPageIndex % 0x10) == 0) && !((PageIndex + 1) >= PageCount))
+                                {
+                                    //
+                                    // Next Xpress block.
+                                    // Make sure we still have another round to go to avoid a double GetNextCompressedBlock()
+                                    //
+                                    CompressedBlock->GetNextCompressedBlock();
+                                    MemDesc.Compressed.XpressHeader = CompressedBlock->GetCompressedBlockOffset();
+                                    MemDesc.IsCompressed = CompressedBlock->IsCompressed();
+                                    if (!MemDesc.IsCompressed)
+                                    {
+                                        MemDesc.Uncompressed.BaseOffset = CompressedBlock->GetCompressedBlockOffset();
+                                        MemDesc.Uncompressed.BaseOffset += CompressedBlock->GetCompressedHeaderSize();
+                                    }
+                                    MemDesc.CompressedSize = CompressedBlock->GetCompressedBlockSize();
+                                }
+
+                                MemDesc.Compressed.XpressIndex = (CompressedPageIndex % 0x10);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CompressedPageIndex += (ULONG)PageCount;
+                        Base->GetMemoryNodes()->InsertNode(StartPage * PAGE_SIZE, &MemDesc);
+                    }
+
+                    delete Entry;
                 }
-            }
-            else
-            {
-                CompressedPageIndex += (ULONG)PageCount;
-                Base->GetMemoryNodes()->InsertNode(StartPage * PAGE_SIZE, &MemDesc);
-            }
 
-            delete Entry;
+                j++;
+                if (!RangeTable->GetNextRangeTable())
+                {
+                    //
+                    // No more range table to read.
+                    //
+                    if (TotalUncompressedPages) Result = TRUE;
+                    break;
+                }
+                delete CompressedBlock;
+            }
         }
-
-        j++;
-        if (!RangeTable->GetNextRangeTable())
-        {
-            //
-            // No more range table to read.
-            //
-            if (TotalUncompressedPages) Result = TRUE;
-            break;
-        }
-        delete CompressedBlock;
     }
 
 #if 0
