@@ -51,8 +51,7 @@ ProcessHiberfil(
 
     if ((Base->GetSignature() == HIBR_IMAGE_SIGNATURE_WAKE) && Base->GetContext()->IsWin8AndAbove())
     {
-        Red(L"  Error: The content of the hibernation file had been wiped out.\n");
-        return FALSE;
+        Red(L"  Warning: The signature is WAKE. The content of the hibernation file could be wiped out.\n");
     }
 
     if (Vars->HasDataOffset) {
