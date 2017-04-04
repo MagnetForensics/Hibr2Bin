@@ -35,11 +35,11 @@ Help()
             L"  Enables users to uncompress Windows hibernation file.\n\n");
 
     wprintf(L"Options:\n"
-            L"  /PLATFORM, /P         Select platform (X64 or X86)\n\n"
-            L"  /MAJOR, /V            Select major version (e.g. 6 for NT 6.1\n\n"
-            L"  /MINOR, /M            Select minor version (e.g. 1 for NT 6.1)\n\n"
-            L"  /OFFSET, /L           Data offset in hexadecimal (optional)\n\n"
-            L"  /INPUT, /I            Input hiberfil.sys file.\n\n"
+            L"  /PLATFORM, /P         Select platform (X64 or X86)\n"
+            L"  /MAJOR, /V            Select major version (e.g. 6 for NT 6.1\n"
+            L"  /MINOR, /M            Select minor version (e.g. 1 for NT 6.1)\n"
+            L"  /OFFSET, /L           Data offset in hexadecimal (optional)\n"
+            L"  /INPUT, /I            Input hiberfil.sys file.\n"
             L"  /OUTPUT, /O           Output hiberfil.sys file.\n\n");
 
     wprintf(L"Versions:\n"
@@ -51,10 +51,12 @@ Help()
             L"  /MAJOR 6 /MINOR 3     Windows 8.1, Windows Server 2012 R2\n"
             L"  /MAJOR 10 /MINOR 0    Windows 10, Windows Server 2017\n\n");
 
+    wprintf(L"Examples:\n\n");
+
     wprintf(L"  Uncompress a Windows 7 (NT 6.1) x64 hibernation file:\n"
-            L"      HIBR2BIN /PLATFORM X64 /MAJOR 6 /MINOR 1 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n\n"
+            L"      Hibr2Bin /PLATFORM X64 /MAJOR 6 /MINOR 1 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n\n"
             L"  Uncompress a Windows 10 (NT 10.0) x86 hibernation file:\n"
-            L"      HIBR2BIN /PLATFORM X86 /MAJOR 10 /MINOR 0 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n\n");
+            L"      Hibr2Bin /PLATFORM X86 /MAJOR 10 /MINOR 0 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n");
 }
 
 BOOLEAN
@@ -218,11 +220,11 @@ wmain(
     PROGRAM_ARGUMENTS Arguments = { 0 };
 
     wprintf(L"\n"
-        L"  Hibr2Bin %S\n"
-        L"  Copyright (C) 2007 - 2017, Matthieu Suiche <http://www.msuiche.net>\n"
-        L"  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
-        L"  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n\n",
-        COMAE_TOOLKIT_VERSION);
+            L"  Hibr2Bin %S\n"
+            L"  Copyright (C) 2007 - 2017, Matthieu Suiche <http://www.msuiche.net>\n"
+            L"  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
+            L"  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n\n",
+            COMAE_TOOLKIT_VERSION);
 
     if ((argc < 2) || !Parse(argc, argv, &Arguments))
     {

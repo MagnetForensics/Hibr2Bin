@@ -17,6 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -70,9 +71,9 @@ BEGIN
             VALUE "FileDescription", "Windows hibernation file decompressor."
             VALUE "FileVersion", "3.0.0.0"
             VALUE "InternalName", "Hibr2Bin.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2016"
+            VALUE "LegalCopyright", "Copyright (C) 2017 Comae Technologies FZE"
             VALUE "OriginalFilename", "Hibr2Bin.exe"
-            VALUE "ProductName", "Windows Memory Toolkit"
+            VALUE "ProductName", "Comae Toolkit"
             VALUE "ProductVersion", "3.0.0.0"
         END
     END
