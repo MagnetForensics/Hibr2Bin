@@ -26,11 +26,11 @@ Revision History:
 //
 // MemoryObject
 //
-VOID
-MemoryObject::Init(FileContext *FileContext, ULONG64 FileOffset, ULONG DataSize, BOOLEAN NoAllocationFlag)
+void
+MemoryObject::Init(FileContext *FileContext, uint64_t FileOffset, uint32_t DataSize, bool NoAllocationFlag)
 {
     m_NoAllocationFlag = NoAllocationFlag;
-    m_Data = FileContext->ReadFile(FileOffset, DataSize, NoAllocationFlag ? NULL : &m_Data);
+    m_Data = (uint8_t *)FileContext->ReadFile(FileOffset, DataSize, NoAllocationFlag ? NULL : &m_Data);
 
     m_IsObjectValid = !!(m_Data);
     if (IsValid())
@@ -41,7 +41,7 @@ MemoryObject::Init(FileContext *FileContext, ULONG64 FileOffset, ULONG DataSize,
     }
 }
 
-PVOID
+void *
 MemoryObject::GetData(
 )
 {
@@ -50,21 +50,21 @@ MemoryObject::GetData(
     return m_Data;
 }
 
-PVOID
+void *
 MemoryObject::GetData(
-    ULONG64 FileOffset,
-    ULONG DataSize
+    uint64_t FileOffset,
+    uint32_t DataSize
 )
 {
-    PVOID Data = NULL;
+    void *Data = NULL;
 
     //
     // Within range.
     //
     if ((FileOffset >= m_FileBaseOffset) && ((FileOffset + DataSize) <= (m_FileBaseOffset + m_DataSize)))
     {
-        ULONG64 Offset = FileOffset - m_FileBaseOffset;
-        Data = (((PUCHAR)m_Data) + (ULONG)Offset);
+        uint64_t Offset = FileOffset - m_FileBaseOffset;
+        Data = (((uint8_t *)m_Data) + (uint32_t)Offset);
     }
 
     return Data;
@@ -74,11 +74,11 @@ MemoryObject::GetData(
 // MemoryRangeTable
 //
 
-ULONG
+uint32_t
 MemoryRangeTable::GetRangeCount(
 )
 {
-    ULONG RangeCount = 0;
+    uint32_t RangeCount = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -113,11 +113,11 @@ MemoryRangeTable::GetRangeCount(
     return RangeCount;
 }
 
-ULONG
+uint32_t
 MemoryRangeTable::GetCompressedSize(
 )
 {
-    ULONG CompressedSize = 0;
+    uint32_t CompressedSize = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -148,7 +148,7 @@ HIBER_COMPRESS_METHOD
 MemoryRangeTable::GetCompressMethod(
 )
 {
-    ULONG CompressMethod = 0;
+    uint32_t CompressMethod = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -175,11 +175,11 @@ MemoryRangeTable::GetCompressMethod(
     return (HIBER_COMPRESS_METHOD)CompressMethod;
 }
 
-PVOID
+void *
 MemoryRangeTable::GetRangeBase(
 )
 {
-    PVOID RangeBase = 0;
+    void *RangeBase = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -208,10 +208,10 @@ MemoryRangeTable::GetRangeBase(
     return RangeBase;
 }
 
-ULONG
+uint32_t
 MemoryRangeTable::GetMemoryRangeTableSize()
 {
-    ULONG SizeOfMemoryRangeTable = 0;
+    uint32_t SizeOfMemoryRangeTable = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -249,19 +249,20 @@ MemoryRangeTable::GetMemoryRangeTableSize()
             }
             break;
     }
+
     return SizeOfMemoryRangeTable;
 }
 
-BOOLEAN
+bool
 MemoryRangeTable::GetNextRangeTable(
 )
 {
-    ULONG64 NextRangeTable;
-    ULONG64 NextTableOffset = 0;
+    uint64_t NextRangeTable;
+    uint64_t NextTableOffset = 0;
 
     NextRangeTable = m_CurrentOffset;
-    ULONG SizeOfMemoryRangeTable = 0;
-    ULONG SizeOfMemoryRange = 0;
+    uint32_t SizeOfMemoryRangeTable = 0;
+    uint32_t SizeOfMemoryRange = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -270,7 +271,7 @@ MemoryRangeTable::GetNextRangeTable(
             {
                 NextTableOffset = ((PPO_MEMORY_RANGE_ARRAY32_NT61)m_MemoryRangeTable->GetData())->Link.NextTable;
 
-                if (NextTableOffset == NULL) return FALSE;
+                if (NextTableOffset == 0ULL) return false;
                 NextTableOffset *= PAGE_SIZE;
             }
             else if (GetContext()->IsWinVista() || GetContext()->IsWinXP())
@@ -279,7 +280,7 @@ MemoryRangeTable::GetNextRangeTable(
 
                 NextTableOffset = ((PPO_MEMORY_RANGE_ARRAY32)m_MemoryRangeTable->GetData())->Link.NextTable;
 
-                if (NextTableOffset == NULL) return FALSE;
+                if (NextTableOffset == 0ULL) return false;
                 NextTableOffset *= PAGE_SIZE;
             }
             break;
@@ -288,30 +289,30 @@ MemoryRangeTable::GetNextRangeTable(
             {
                 NextTableOffset = ((PPO_MEMORY_RANGE_ARRAY32_NT61)m_MemoryRangeTable->GetData())->Link.NextTable;
 
-                if (NextTableOffset == NULL) return FALSE;
+                if (NextTableOffset == 0ULL) return false;
                 NextTableOffset *= PAGE_SIZE;
             }
             else if (GetContext()->IsWinVista())
             {
                 NextTableOffset = ((PPO_MEMORY_RANGE_ARRAY64)m_MemoryRangeTable->GetData())->Link.NextTable;
 
-                if (NextTableOffset == NULL) return FALSE;
+                if (NextTableOffset == 0ULL) return false;
                 NextTableOffset *= PAGE_SIZE;
             }
             else if (GetContext()->IsWinXP64())
             {
                 NextTableOffset = ((PPO_MEMORY_RANGE_ARRAY64_NT52)m_MemoryRangeTable->GetData())->Link.NextTable;
 
-                if (NextTableOffset == NULL) return FALSE;
+                if (NextTableOffset == 0ULL) return false;
                 NextTableOffset *= PAGE_SIZE;
             }
             break;
         default:
-            wprintf(L"  Error: Platform non defined.\n");
+            printf("  Error: Platform non defined.\n");
             break;
     }
 
-    // DbgPrint(L"GetRangeCount() = 0x%x\n", GetRangeCount());
+    // DbgPrint("GetRangeCount() = 0x%x\n", GetRangeCount());
     // m_MemoryRangeTableSize = PAGE_SIZE;
 
     if (NextTableOffset == 0)
@@ -330,10 +331,10 @@ MemoryRangeTable::GetNextRangeTable(
         //
         // This means we are already on the last table.
         //
-        ULONG RangeCount = GetRangeCount();
+        uint32_t RangeCount = GetRangeCount();
 
         if (!((RangeCount == 0xFF) || (RangeCount == 0x7F) ||
-            (RangeCount == 0x1FF) || (RangeCount == 0xFE))) return FALSE;
+            (RangeCount == 0x1FF) || (RangeCount == 0xFE))) return false;
 
         m_CurrentOffset = NextTableOffset;
     }
@@ -343,12 +344,12 @@ MemoryRangeTable::GetNextRangeTable(
     
     if (m_MemoryRangeTable->IsValid())
     {
-        ULONG RangeCount = GetRangeCount();
+        uint32_t RangeCount = GetRangeCount();
         if (GetContext()->IsWin8AndAbove())
         {
             if ((RangeCount > MAX_HIBER_PAGES) || (RangeCount == 0))
             {
-                return FALSE;
+                return false;
             }
         }
     }
@@ -356,7 +357,7 @@ MemoryRangeTable::GetNextRangeTable(
     return m_MemoryRangeTable->IsValid();
 }
 
-ULONG
+uint32_t
 MemoryRangeTable::GetMemoryRangeEntrySize()
 {
     switch (GetContext()->GetPlatform())
@@ -387,32 +388,32 @@ MemoryRangeTable::GetMemoryRangeEntrySize()
 
 MemoryRangeEntry *
 MemoryRangeTable::GetRangeEntry(
-    _In_ ULONG Index
+    _In_ uint32_t Index
 )
 {
-    return new MemoryRangeEntry(GetContext(), ((PUCHAR)GetRangeBase()) + (Index * GetMemoryRangeEntrySize()));
+    return new MemoryRangeEntry(GetContext(), ((uint8_t *)GetRangeBase()) + (Index * GetMemoryRangeEntrySize()));
 }
 
-ULONG
+uint32_t
 MemoryRangeTable::GetCompressedBlockIndex(
-    _In_ ULONG RangeIndex
+    _In_ uint32_t RangeIndex
 )
 {
-    ULONG CompressedPagesCount = 0;
+    uint32_t CompressedPagesCount = 0;
 
     if (RangeIndex > 0x1FF) return 0;
 
-    for (ULONG i = 0; i < RangeIndex; i++)
+    for (uint32_t i = 0; i < RangeIndex; i++)
     {
         MemoryRangeEntry *Entry = GetRangeEntry(i);
-        CompressedPagesCount += (ULONG)Entry->GetPageCount();
+        CompressedPagesCount += (uint32_t)Entry->GetPageCount();
         delete Entry;
     }
 
     return CompressedPagesCount;
 }
 
-ULONG64
+uint64_t
 MemoryRangeTable::GetCompressedBlockOffset(
 )
 {
@@ -428,11 +429,11 @@ MemoryRangeTable::GetCompressedBlockOffset(
 // Memory Range Entries (MemoryRangeEntry)
 //
 
-ULONG64
+uint64_t
 MemoryRangeEntry::GetPageCount(
 )
 {
-    ULONG64 PageCount = 0;
+    uint64_t PageCount = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -445,14 +446,14 @@ MemoryRangeEntry::GetPageCount(
                 PageCount = ((PPO_MEMORY_RANGE32_NT62)m_MemoryRangeEntry)->PageCount + 1;
             else if (GetContext()->IsWin7())
             {
-                ULONG StartPage, EndPage;
+                uint32_t StartPage, EndPage;
                 StartPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE32_NT61)m_MemoryRangeEntry)->StartPage;
                 EndPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE32_NT61)m_MemoryRangeEntry)->EndPage;
                 PageCount = EndPage - StartPage;
             }
             else if (GetContext()->IsWinVista() || GetContext()->IsWinXP())
             {
-                ULONG StartPage, EndPage;
+                uint32_t StartPage, EndPage;
                 StartPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE32)m_MemoryRangeEntry)->StartPage;
                 EndPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE32)m_MemoryRangeEntry)->EndPage;
                 PageCount = EndPage - StartPage;
@@ -467,21 +468,21 @@ MemoryRangeEntry::GetPageCount(
                 PageCount = ((PPO_MEMORY_RANGE64_NT62)m_MemoryRangeEntry)->PageCount + 1;
             else if (GetContext()->IsWin7())
             {
-                ULONG64 StartPage, EndPage;
+                uint64_t StartPage, EndPage;
                 StartPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64_NT61)m_MemoryRangeEntry)->StartPage;
                 EndPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64_NT61)m_MemoryRangeEntry)->EndPage;
                 PageCount = EndPage - StartPage;
             }
             else if (GetContext()->IsWinVista())
             {
-                ULONG64 StartPage, EndPage;
+                uint64_t StartPage, EndPage;
                 StartPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64)m_MemoryRangeEntry)->StartPage;
                 EndPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64)m_MemoryRangeEntry)->EndPage;
                 PageCount = EndPage - StartPage;
             }
             else if (GetContext()->IsWinXP64())
             {
-                ULONG64 StartPage, EndPage;
+                uint64_t StartPage, EndPage;
                 StartPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64_NT52)m_MemoryRangeEntry)->StartPage;
                 EndPage = ((PPO_MEMORY_RANGE_ARRAY_RANGE64_NT52)m_MemoryRangeEntry)->EndPage;
                 PageCount = EndPage - StartPage;
@@ -492,11 +493,11 @@ MemoryRangeEntry::GetPageCount(
     return PageCount;
 }
 
-ULONG64
+uint64_t
 MemoryRangeEntry::GetStartPage(
 )
 {
-    ULONG64 StartPage = 0;
+    uint64_t StartPage = 0;
 
     switch (GetContext()->GetPlatform())
     {
@@ -535,11 +536,11 @@ MemoryRangeEntry::GetStartPage(
 // CompressedMemoryBlock
 //
 
-VOID
+void
 CompressedMemoryBlock::Init(
     FileContext *FileContext,
-    ULONG64 Offset,
-    BOOLEAN NoAllocationFlag
+    uint64_t Offset,
+    bool NoAllocationFlag
 )
 {
     m_FileContext = FileContext;
@@ -553,12 +554,12 @@ CompressedMemoryBlock::Init(
     SetCompressedBlock(m_CompressedBlock->GetData());
 }
 
-VOID
+void
 CompressedMemoryBlock::SetCompressedBlock(
-    PVOID CompressedData
+    void *CompressedData
 )
 {
-    m_CompressedData = (PUCHAR)CompressedData;
+    m_CompressedData = (uint8_t *)CompressedData;
 
     assert(m_CompressedData);
 
@@ -566,8 +567,8 @@ CompressedMemoryBlock::SetCompressedBlock(
     {
         // Old version (XPRESS tag present)
 
-        UCHAR xprs[XPRESS_HEADER_SIZE];
-        ULONG Info;
+        uint8_t xprs[XPRESS_HEADER_SIZE];
+        uint32_t Info;
 
         RtlCopyMemory(xprs, m_CompressedData, XPRESS_HEADER_SIZE);
         m_CompressedHeaderSize = XPRESS_HEADER_SIZE;
@@ -586,36 +587,36 @@ CompressedMemoryBlock::SetCompressedBlock(
     }
     else
     {
-        m_IsCompressed = TRUE;
+        m_IsCompressed = true;
     }
 }
 
-PVOID
+void *
 CompressedMemoryBlock::GetDecompressedPage(
 )
 {
     if ((m_UncompressedPageIndex % 0x10) == 0) GetNextCompressedBlock();
     if (m_UncompressedData == NULL) GetDecompressedData();
 
-    PUCHAR Page = (PUCHAR)m_UncompressedData + (m_UncompressedPageIndex * PAGE_SIZE);
+    uint8_t *Page = (uint8_t *)m_UncompressedData + (m_UncompressedPageIndex * PAGE_SIZE);
     m_UncompressedPageIndex += 1;
 
     return Page;
 }
 
-PVOID
+void *
 CompressedMemoryBlock::GetDecompressedData(
 )
 /*++
 - Expected to return 0x10000 (64KB)
 --*/
 {
-    ULONG UncompressedBytes;
+    uint32_t UncompressedBytes;
 
     m_MaxDataLength = MAX_COMPRESSED_BLOCK_SIZE;
     delete m_CompressedBlock;
-    m_CompressedBlock = new MemoryObject(GetContext(), m_CurrentOffset, m_MaxDataLength, TRUE);
-    m_CompressedData = (PUCHAR)m_CompressedBlock->GetData();
+    m_CompressedBlock = new MemoryObject(GetContext(), m_CurrentOffset, m_MaxDataLength, true);
+    m_CompressedData = (uint8_t *)m_CompressedBlock->GetData();
     m_CompressedData += m_CompressedHeaderSize;
 
     m_UncompressedPageIndex = 0;
@@ -628,7 +629,7 @@ CompressedMemoryBlock::GetDecompressedData(
 
     assert(m_CompressedSize != (PAGE_SIZE * 0x10));
 
-    m_UncompressedData = (PUCHAR)GetContext()->GetTempBuffer();
+    m_UncompressedData = (uint8_t *)GetContext()->GetTempBuffer();
     UncompressedBytes = Xpress_Decompress(m_CompressedData, m_CompressedSize, m_UncompressedData, 0x10 * PAGE_SIZE);
     // assert(UncompressedBytes == (m_NumberOfUncompressedPages * PAGE_SIZE));
     // assert(UncompressedBytes == 0x10 * PAGE_SIZE);
@@ -636,7 +637,7 @@ CompressedMemoryBlock::GetDecompressedData(
     return m_UncompressedData;
 }
 
-VOID
+void
 CompressedMemoryBlock::GetNextCompressedBlock(
 )
 {
@@ -651,12 +652,12 @@ CompressedMemoryBlock::GetNextCompressedBlock(
     SetCompressedBlock(m_CompressedBlock->GetData());
 }
 
-ULONG
+uint32_t
 CompressedMemoryBlock::Xpress_Decompress(
-    PUCHAR InputBuffer,
-    ULONG InputSize,
-    PUCHAR OutputBuffer,
-    ULONG OutputSize
+    uint8_t *InputBuffer,
+    uint32_t InputSize,
+    uint8_t *OutputBuffer,
+    uint32_t OutputSize
 )
 /*++
 
@@ -680,12 +681,12 @@ Return Value:
 
 --*/
 {
-    ULONG OutputIndex, InputIndex;
-    ULONG Indicator, IndicatorBit;
-    ULONG Length;
-    ULONG Offset;
-    ULONG NibbleIndex;
-    ULONG NibbleIndicator;
+    uint32_t OutputIndex, InputIndex;
+    uint32_t Indicator, IndicatorBit;
+    uint32_t Length;
+    uint32_t Offset;
+    uint32_t NibbleIndex;
+    uint32_t NibbleIndicator;
 
     Indicator = 0;
     IndicatorBit = 0;
@@ -707,7 +708,7 @@ Return Value:
             Indicator |= (InputBuffer[InputIndex + 1] << 8);
             Indicator |= InputBuffer[InputIndex];
 
-            InputIndex += sizeof(ULONG);
+            InputIndex += sizeof(uint32_t);
 
             IndicatorBit = 32;
         }
@@ -725,8 +726,8 @@ Return Value:
             if (InputIndex >= InputSize) break;
             OutputBuffer[OutputIndex] = InputBuffer[InputIndex];
 
-            InputIndex += sizeof(UCHAR);
-            OutputIndex += sizeof(UCHAR);
+            InputIndex += sizeof(uint8_t);
+            OutputIndex += sizeof(uint8_t);
         }
         else
         {
@@ -734,7 +735,7 @@ Return Value:
             Length = (InputBuffer[InputIndex + 1] << 8);
             Length |= InputBuffer[InputIndex];
 
-            InputIndex += sizeof(USHORT);
+            InputIndex += sizeof(uint16_t);
 
             Offset = Length / 8;
             Length = Length % 8;
@@ -748,7 +749,7 @@ Return Value:
                     if (InputIndex >= InputSize) break;
                     Length = InputBuffer[InputIndex] % 16;
 
-                    InputIndex += sizeof(UCHAR);
+                    InputIndex += sizeof(uint8_t);
                 }
                 else
                 {
@@ -762,7 +763,7 @@ Return Value:
                     if (InputIndex >= InputSize) break;
                     Length = InputBuffer[InputIndex];
 
-                    InputIndex += sizeof(UCHAR);
+                    InputIndex += sizeof(uint8_t);
 
                     if (Length == 255)
                     {
@@ -770,7 +771,7 @@ Return Value:
                         Length = (InputBuffer[InputIndex + 1] << 8);
                         Length |= InputBuffer[InputIndex];
 
-                        InputIndex += sizeof(USHORT);
+                        InputIndex += sizeof(uint16_t);
 
                         Length -= (15 + 7);
                     }
@@ -787,8 +788,8 @@ Return Value:
 
                 OutputBuffer[OutputIndex] = OutputBuffer[OutputIndex - Offset - 1];
 
-                OutputIndex += sizeof(UCHAR);
-                Length -= sizeof(UCHAR);
+                OutputIndex += sizeof(uint8_t);
+                Length -= sizeof(uint8_t);
             }
         }
     }
@@ -799,13 +800,13 @@ Return Value:
 //
 // MemoryBlock
 //
-ULONG
+uint32_t
 MemoryBlock::GetSignature(
 )
 {
-    ULONG Signature = 0;
-    PVOID pSignature = &Signature;
-    PVOID Data = NULL;
+    uint32_t Signature = 0;
+    uint8_t *pSignature = (uint8_t *)&Signature;
+    void *Data = NULL;
 
     Data = GetContext()->ReadFile(0, sizeof(Signature), &pSignature);
     assert(pSignature == Data);
@@ -813,49 +814,48 @@ MemoryBlock::GetSignature(
     return Signature;
 }
 
-ULONG64
+uint64_t
 MemoryBlock::GetFirstKernelRestorePage(
-    VOID
+    void
     )
 {
-    BYTE Header[PAGE_SIZE];
-    PVOID HeaderPointer = &Header;
-    ULONG64 FirstKernelRestorePage = NULL;
+    uint8_t Header[PAGE_SIZE];
+    uint8_t *HeaderPointer = (uint8_t *)&Header;
+    uint64_t FirstKernelRestorePage = 0ULL;
 
     GetContext()->ReadFile(0, sizeof(Header), &HeaderPointer);
 
     if (GetContext()->IsWin8AndAbove()) {
 
         switch (GetContext()->GetPlatform()) {
+            case PlatformX86:
+            {
+                FirstKernelRestorePage = *(uint32_t *)&Header[0x54];
 
-        case PlatformX86:
-        {
-            FirstKernelRestorePage = *(PULONG)&Header[0x54];
-
-            break;
-        }
-        case PlatformX64:
-        {
-            if (GetContext()->IsWin10()) {
-
-                FirstKernelRestorePage = *(PULONG64)&Header[0x70];
+                break;
             }
-            else {
+            case PlatformX64:
+            {
+                if (GetContext()->IsWin10()) {
 
-                FirstKernelRestorePage = *(PULONG64)&Header[0x68];
+                    FirstKernelRestorePage = *(uint64_t *)&Header[0x70];
+                }
+                else {
+
+                    FirstKernelRestorePage = *(uint64_t *)&Header[0x68];
+                }
+
+                break;
             }
-
-            break;
-        }
         }
 
         return FirstKernelRestorePage * PAGE_SIZE;
     }
 
-    return NULL;
+    return 0ULL;
 }
 
-ULONG64
+uint64_t
 MemoryBlock::GetInitialOffset(
 )
 {
@@ -864,29 +864,29 @@ MemoryBlock::GetInitialOffset(
     //
     if (GetContext()->IsWin8AndAbove())
     {
-        ULONG64 Offset = 0;
+        uint64_t Offset = 0;
 
-        for (UINT i = 5; i < 0x30; i += 1)
+        for (uint32_t i = 5; i < 0x30; i += 1)
         {
-            ULONG BytesToRead = 0x20;
-            UCHAR Data[0x20];
-            PVOID pData = &Data;
+            uint32_t BytesToRead = 0x20;
+            uint8_t Data[0x20];
+            uint8_t *pData = (uint8_t *)&Data;
             Offset = (i * PAGE_SIZE) - BytesToRead;
-            ULONG64 CurrentPage = (ULONG64)i * PAGE_SIZE;
+            uint64_t CurrentPage = (uint64_t)i * PAGE_SIZE;
             if (GetContext()->ReadFile(Offset, sizeof(Data), &pData))
             {
-                ULONG NullBytes = TRUE;
-                for (UINT i = 0; i < BytesToRead; i += 1)
+                uint32_t NullBytes = true;
+                for (uint32_t i = 0; i < BytesToRead; i += 1)
                 {
                     if (Data[i] != '\0')
                     {
-                        NullBytes = FALSE;
+                        NullBytes = false;
                         break;
                     }
                 }
 
                 if (NullBytes) {
-                    DbgPrint(L" Potential /OFFSET 0x%llx \n", CurrentPage);
+                    DbgPrint(" Potential /OFFSET 0x%" I64_FORMAT " \n", CurrentPage);
                     return CurrentPage;
                 }
             }

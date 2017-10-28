@@ -23,60 +23,64 @@ Revision History:
 
 #include "precomp.h"
 
-BOOLEAN
+bool
 WriteMemoryBlocksToDisk(
     _In_ MemoryBlock *Base,
     _In_ PPROGRAM_ARGUMENTS Vars
 )
 {
-    ULONG64 FileOffset = 0;
-    ULONG CacheOffset = 0;
-    PUCHAR Cache;
+    uint64_t FileOffset = 0;
+    uint32_t CacheOffset = 0;
+    uint8_t *Cache = NULL;
 
-    BOOLEAN Result = FALSE;
-    ULONG i = 0;
-    BYTE *Hash = NULL;
+    bool Result = false;
 
     //
     // Console
     //
+#if _WIN32
     HANDLE Handle;
     COORD Initial;
+    uint32_t i = 0;
+    uint8_t *Hash = NULL;
+#endif
 
-    BOOLEAN NoMoreEntries = FALSE;
+    bool NoMoreEntries = false;
 
     if (Vars->OutFileName) Base->GetContext()->CreateOutputFile(Vars->OutFileName);
-    else return FALSE;
+    else return false;
 
     //
     // Create a one Mb Cache.
     //
-    Cache = new byte[WRITE_CACHE_SIZE];
+    Cache = new uint8_t[WRITE_CACHE_SIZE];
     memset(Cache, 0, WRITE_CACHE_SIZE);
 
-    wprintf(L"\n");
+    printf("\n");
+#if _WIN32
     Handle = GetStdHandle(STD_OUTPUT_HANDLE);
     GetCursorPosition(Handle, &Initial);
 
     if (!CryptInitSha256()) {
-        Red(L"  Error: SHA256 initialization failed with error = %d\n", GetLastError());
+        Red("  Error: SHA256 initialization failed with error = %d\n", GetLastError());
     }
+#endif 
     MemoryNode *Current = Base->GetMemoryNodes()->GetFirstChild();
     CompressedMemoryBlock *Block = NULL;
 
-    ULONG XpressPageIndex = 0;
+    uint32_t XpressPageIndex = 0;
 
     while (Current)
     {
-        ULONG BytesToWrite;
+        uint32_t BytesToWrite;
 
         while (CacheOffset < WRITE_CACHE_SIZE)
         {
             if (Block == NULL)
             {
-                ULONG64 Offset = Current->GetKeyObject()->Compressed.XpressHeader;
+                uint64_t Offset = Current->GetKeyObject()->Compressed.XpressHeader;
 
-                Block = new CompressedMemoryBlock(Base->GetContext(), Offset, TRUE);
+                Block = new CompressedMemoryBlock(Base->GetContext(), Offset, true);
                 //if (Current->GetKeyObject()->NoHeader)
                 Block->SetCompressionSize(Current->GetKeyObject()->CompressedSize);
                 Block->SetCompressionType(Current->GetKeyObject()->IsCompressed);
@@ -98,8 +102,8 @@ WriteMemoryBlocksToDisk(
                 {
                     assert((Current->GetKeyObject()->Compressed.XpressIndex + XpressPageIndex) <= 0x10);
 
-                    RtlCopyMemory(Cache + CacheOffset,
-                        (PUCHAR)Block->GetDecompressedData() + (Current->GetKeyObject()->Compressed.XpressIndex + XpressPageIndex) * PAGE_SIZE,
+                    memcpy(Cache + CacheOffset,
+                        (uint8_t *)Block->GetDecompressedData() + (Current->GetKeyObject()->Compressed.XpressIndex + XpressPageIndex) * PAGE_SIZE,
                         PAGE_SIZE);
 
                     FileOffset += PAGE_SIZE;
@@ -115,7 +119,7 @@ WriteMemoryBlocksToDisk(
                     MemoryNode *Right = Current->GetRightChild();
                     if (Right == NULL)
                     {
-                        NoMoreEntries = TRUE;
+                        NoMoreEntries = true;
                         break;
                     }
 
@@ -132,12 +136,19 @@ WriteMemoryBlocksToDisk(
 
         BytesToWrite = CacheOffset;
 
+#if _WIN32
         SetConsoleCursorPosition(Handle, Initial);
-        White(L"   [0x%llx of 0x%llx] ", FileOffset - BytesToWrite, Current->GetKeyObject()->Range.Maximum);
+#else
+        fflush(stdout);
+#endif
+
+        White("  [0x%llx of 0x%llx] \r", FileOffset - BytesToWrite, Current->GetKeyObject()->Range.Maximum + PAGE_SIZE);
+#if _WIN32
         CryptHashData(Cache, BytesToWrite);
+#endif
 
         Result = Base->GetContext()->WriteFile(Cache, BytesToWrite);
-        if (Result == FALSE) goto CleanUp;
+        if (Result == false) goto CleanUp;
 
         CacheOffset = 0;
         memset(Cache, 0, WRITE_CACHE_SIZE);
@@ -145,28 +156,36 @@ WriteMemoryBlocksToDisk(
         if (NoMoreEntries) break;
     }
 
+#if _WIN32
     Hash = CryptGetHash();
+#endif
 
-    Result = TRUE;
+    Result = true;
 
 CleanUp:
-    if (Result == TRUE)
+    if (Result == true)
     {
+#if _WIN32
         SetConsoleCursorPosition(Handle, Initial);
-        Green(L"  [0x%llx of 0x%llx] \n", FileOffset, Current->GetKeyObject()->Range.Maximum);
+#endif
 
+        Green("  [0x%llx of 0x%llx] \n", FileOffset, Current->GetKeyObject()->Range.Maximum + PAGE_SIZE);
+#if _WIN32
         if (Hash != NULL)
         {
-            White(L"   SHA256 = ");
-            for (i = 0; i < CryptGetHashLen(); i += 1) wprintf(L"%02x", Hash[i]);
-            wprintf(L"\n");
+            White("   SHA256 = ");
+            for (i = 0; i < CryptGetHashLen(); i += 1) printf("%02x", Hash[i]);
+            printf("\n");
             delete[] Hash;
         }
+#endif
     }
     else
     {
+#if _WIN32
         SetConsoleCursorPosition(Handle, Initial);
-        Red(L"   [0x%llx of 0x%llx] \n", FileOffset, Current->GetKeyObject()->Range.Maximum);
+#endif
+        Red("  [0x%llx of 0x%llx] \n", FileOffset, Current->GetKeyObject()->Range.Maximum);
     }
 
     if (Cache)

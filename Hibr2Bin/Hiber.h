@@ -26,12 +26,14 @@ Revision History:
 
 #define HIBR_IMAGE_SIGNATURE          'RBIH'
 #define HIBR_IMAGE_SIGNATURE_RESTORE  'RTSR'
-#define HIBR_IMAGE_SIGNATURE_WAKE     'EKAW'
+#define HIBR_IMAGE_SIGNATURE_WAKE      0x454B4157 // 'EKAW'
 #define HIBR_IMAGE_SIGNATURE_BREAK    'PKRB'
 #define HIBR_IMAGE_SIGNATURE_HORM     'MROH'
 
 #define MAX_HIBER_PAGES (16)
+#ifndef PAGE_SIZE
 #define PAGE_SIZE 0x1000
+#endif
 #define MAX_COMPRESSED_BLOCK (MAX_HIBER_PAGES * PAGE_SIZE)
 
 //
@@ -39,18 +41,18 @@ Revision History:
 //
 typedef struct _PO_MEMORY_RANGE_ARRAY_LINK32
 {
-    ULONG Next;
-    ULONG NextTable;
-    ULONG CheckSum;
-    ULONG EntryCount;
+    uint32_t Next;
+    uint32_t NextTable;
+    uint32_t CheckSum;
+    uint32_t EntryCount;
 } PO_MEMORY_RANGE_ARRAY_LINK32, *PPO_MEMORY_RANGE_ARRAY_LINK32;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY_RANGE32
 {
-    ULONG PageNo;
-    ULONG StartPage;
-    ULONG EndPage;
-    ULONG CheckSum;
+    uint32_t PageNo;
+    uint32_t StartPage;
+    uint32_t EndPage;
+    uint32_t CheckSum;
 } PO_MEMORY_RANGE_ARRAY_RANGE32, *PPO_MEMORY_RANGE_ARRAY_RANGE32;
 
 typedef struct _MEMORY_RANGE_ARRAY
@@ -64,19 +66,19 @@ typedef struct _MEMORY_RANGE_ARRAY
 //
 typedef struct _PO_MEMORY_RANGE_ARRAY_LINK64_NT52
 {
-    ULONGLONG Next;
-    ULONGLONG NextTable;
-    ULONG Checksum;
-    ULONG EntryCount;
-    ULONGLONG Reserved;
+    uint64_t Next;
+    uint64_t NextTable;
+    uint32_t Checksum;
+    uint32_t EntryCount;
+    uint64_t Reserved;
 } PO_MEMORY_RANGE_ARRAY_LINK64_NT52, *PPO_MEMORY_RANGE_ARRAY_LINK64_NT52;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY_RANGE64_NT52
 {
-    ULONGLONG PageNo;
-    ULONGLONG StartPage;
-    ULONGLONG EndPage;
-    ULONGLONG CheckSum;
+    uint64_t PageNo;
+    uint64_t StartPage;
+    uint64_t EndPage;
+    uint64_t CheckSum;
 } PO_MEMORY_RANGE_ARRAY_RANGE64_NT52, *PPO_MEMORY_RANGE_ARRAY_RANGE64_NT52;
 
 typedef struct _MEMORY_RANGE_ARRAY64_NT52
@@ -90,16 +92,16 @@ typedef struct _MEMORY_RANGE_ARRAY64_NT52
 //
 typedef struct _PO_MEMORY_RANGE_ARRAY_LINK64
 {
-    ULONGLONG Next;
-    ULONGLONG NextTable;
-    ULONG EntryCount;
-    ULONG Padding;
+    uint64_t Next;
+    uint64_t NextTable;
+    uint32_t EntryCount;
+    uint32_t Padding;
 } PO_MEMORY_RANGE_ARRAY_LINK64, *PPO_MEMORY_RANGE_ARRAY_LINK64;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY_RANGE64
 {
-    ULONGLONG StartPage;
-    ULONGLONG EndPage;
+    uint64_t StartPage;
+    uint64_t EndPage;
 } PO_MEMORY_RANGE_ARRAY_RANGE64, *PPO_MEMORY_RANGE_ARRAY_RANGE64;
 
 typedef struct _MEMORY_RANGE_ARRAY64
@@ -113,13 +115,13 @@ typedef struct _MEMORY_RANGE_ARRAY64
 // NT 6.1 x86
 //
 typedef struct _PO_MEMORY_RANGE_ARRAY_RANGE32_NT61 {
-    ULONG StartPage;
-    ULONG EndPage;
+    uint32_t StartPage;
+    uint32_t EndPage;
 } PO_MEMORY_RANGE_ARRAY_RANGE32_NT61, *PPO_MEMORY_RANGE_ARRAY_RANGE32_NT61;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY_LINK32_NT61 {
-    ULONG NextTable;
-    ULONG EntryCount;
+    uint32_t NextTable;
+    uint32_t EntryCount;
 } PO_MEMORY_RANGE_ARRAY_LINK32_NT61, *PPO_MEMORY_RANGE_ARRAY_LINK32_NT61;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY32_NT61 {
@@ -131,14 +133,14 @@ typedef struct _PO_MEMORY_RANGE_ARRAY32_NT61 {
 // NT 6.1 x64
 //
 typedef struct _PO_MEMORY_RANGE_ARRAY_RANGE64_NT61 {
-    ULONGLONG StartPage;
-    ULONGLONG EndPage;
+    uint64_t StartPage;
+    uint64_t EndPage;
 } PO_MEMORY_RANGE_ARRAY_RANGE64_NT61, *PPO_MEMORY_RANGE_ARRAY_RANGE64_NT61;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY_LINK64_NT61 {
-    ULONGLONG NextTable;
-    ULONG EntryCount;
-    ULONG Padding;
+    uint64_t NextTable;
+    uint32_t EntryCount;
+    uint32_t Padding;
 } PO_MEMORY_RANGE_ARRAY_LINK64_NT61, *PPO_MEMORY_RANGE_ARRAY_LINK64_NT61;
 
 typedef struct _PO_MEMORY_RANGE_ARRAY64_NT61 {
@@ -160,15 +162,15 @@ typedef enum _HIBER_COMPRESS_METHOD
 
 typedef struct _PO_MEMORY_RANGE32_NT62
 {
-    ULONG PageCount : 4;
-    ULONG StartPage : 28;
+    uint32_t PageCount : 4;
+    uint32_t StartPage : 28;
 } PO_MEMORY_RANGE32_NT62, *PPO_MEMORY_RANGE32_NT62;
 
 typedef struct _PO_MEMORY_RANGE_TABLE32_NT62
 {
-    ULONG RangeCount : 8;
-    ULONG CompressedSize : 22;
-    ULONG CompressMethod : 2;
+    uint32_t RangeCount : 8;
+    uint32_t CompressedSize : 22;
+    uint32_t CompressMethod : 2;
     PO_MEMORY_RANGE32_NT62 Range[ANYSIZE_ARRAY];
 } PO_MEMORY_RANGE_TABLE32_NT62, *PPO_MEMORY_RANGE_TABLE32_NT62;
 
@@ -176,15 +178,16 @@ typedef struct _PO_MEMORY_RANGE_TABLE32_NT62
 #pragma pack(4) // set alignment to 1 byte boundary
 typedef struct _PO_MEMORY_RANGE64_NT62
 {
-    ULONG64 PageCount : 4;
-    ULONG64 StartPage : 28;
+    uint64_t PageCount : 4;
+    uint64_t StartPage : 28;
+    uint64_t padding : 32;
 } PO_MEMORY_RANGE64_NT62, *PPO_MEMORY_RANGE64_NT62;
 
 typedef struct _PO_MEMORY_RANGE_TABLE64_NT62
 {
-    ULONG RangeCount : 8;
-    ULONG CompressedSize : 22;
-    ULONG CompressMethod : 2;
+    uint32_t RangeCount : 8;
+    uint32_t CompressedSize : 22;
+    uint32_t CompressMethod : 2;
     PO_MEMORY_RANGE64_NT62 Range[ANYSIZE_ARRAY];
 } PO_MEMORY_RANGE_TABLE64_NT62, *PPO_MEMORY_RANGE_TABLE64_NT62;
 #pragma pack(pop)

@@ -24,29 +24,29 @@ Revision History:
 #define WRITE_CACHE_SIZE (1024 * 1024)
 
 typedef struct _PROGRAM_ARGUMENTS {
-    LPWSTR FileName;
-    LPWSTR OutFileName;
+    char * FileName;
+    char * OutFileName;
 
     PlatformType Platform;
-    BOOLEAN HasPlatform;
+    bool HasPlatform;
 
-    ULONG MajorVersion;
-    BOOLEAN HasMajorVersion;
+    uint32_t MajorVersion;
+    bool HasMajorVersion;
 
-    ULONG MinorVersion;
-    BOOLEAN HasMinorVersion;
+    uint32_t MinorVersion;
+    bool HasMinorVersion;
 
-    ULONGLONG DataOffset;
-    BOOLEAN HasDataOffset;
+    uint64_t DataOffset;
+    bool HasDataOffset;
 } PROGRAM_ARGUMENTS, *PPROGRAM_ARGUMENTS;
 
-BOOLEAN
+bool
 ProcessHiberfil(
     _In_ PPROGRAM_ARGUMENTS Vars,
     _Out_ MemoryBlock **OutMemoryBlock
 );
 
-BOOLEAN
+bool
 WriteMemoryBlocksToDisk(
     _In_ MemoryBlock *Base,
     _In_ PPROGRAM_ARGUMENTS Vars

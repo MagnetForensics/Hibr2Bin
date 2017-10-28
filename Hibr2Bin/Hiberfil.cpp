@@ -22,41 +22,41 @@ Revision History:
 --*/
 
 #include "precomp.h"
-BOOLEAN
+bool
 ProcessHiberfil(
     _In_ PPROGRAM_ARGUMENTS Vars,
     _Out_ MemoryBlock **OutMemoryBlock
 )
 {
-    BOOLEAN Result = FALSE;
-    ULONG64 RestorePage[2];
-    ULONG TotalUncompressedPages = 0;
-    ULONG j = 0;
-    ULONG i;
+    bool Result = false;
+    uint64_t RestorePage[2];
+    uint32_t TotalUncompressedPages = 0;
+    uint32_t j = 0;
+    uint32_t i;
 
     if (!Vars->HasPlatform || !Vars->HasMajorVersion ||
         !Vars->HasMinorVersion || !Vars->FileName ||
         !Vars->OutFileName)
     {
-        Red(L"  Error: Invalid parameters.\n");
-        return FALSE;
+        Red("  Error: Invalid parameters.\n");
+        return false;
     }
 
     MemoryBlock *Base = new MemoryBlock(Vars->Platform, Vars->MajorVersion, Vars->MinorVersion);
     if (!Base->GetContext()->OpenFile(Vars->FileName))
     {
-        wprintf(L"  Error: File not found!\n");
-        return FALSE;
+        printf("  Error: File not found!\n");
+        return false;
     }
 
     if ((Base->GetSignature() == HIBR_IMAGE_SIGNATURE_WAKE) && Base->GetContext()->IsWin8AndAbove())
     {
-        Red(L"  Warning: The signature is WAKE. The content of the hibernation file could be wiped out.\n");
+        Red("  Warning: The signature is WAKE. The content of the hibernation file could be wiped out.\n");
     }
 
     if (Vars->HasDataOffset) {
 
-        White(L"  Data offset:    0x%llx\n", Vars->DataOffset);
+        White("  Data offset:    0x%llx\n", Vars->DataOffset);
 
         RestorePage[0] = Vars->DataOffset;
     }
@@ -74,27 +74,38 @@ ProcessHiberfil(
             Base->SetInitialOffset(RestorePage[i]);
 
             MemoryRangeTable *RangeTable = Base->GetFirstRangeTable();
-            ULONG RangeTableIndex = 0;
+            uint32_t RangeTableIndex = 0;
 
-            wprintf(L"  ");
+            // printf("  ");
 
             while (RangeTable->IsValid())
             {
-                wprintf(L".");
-                // wprintf(L"Table #%d\n", j);
+#if _WIN32
+                printf(".");
+#else
+                {
+                    char bar[] = "======================================="
+                        "======================================>";
+                    int barIndex;
+                    barIndex = 77 - ((j / 100) % 77);
+                    printf("  (#%-8d) [%-77s] \r", j, &bar[barIndex]);
+                    fflush(stdout);
+                }
+#endif
+                // printf("Table #%d\n", j);
 
                 CompressedMemoryBlock *CompressedBlock = new CompressedMemoryBlock(RangeTable->GetContext(), RangeTable->GetCompressedBlockOffset());
 
-                ULONG RangeCount = RangeTable->GetRangeCount();
+                uint32_t RangeCount = RangeTable->GetRangeCount();
                 if (RangeCount > 0x1FF)
                 {
-                    Red(L"  Error: Invalid file format.\n");
+                    Red("  Error: Invalid file format.\n");
                     break;
                 }
 
-                ULONG UncompressedPages = RangeTable->GetCompressedBlockIndex(RangeCount);
-                ULONG CompressedSize = RangeTable->GetCompressedSize();
-                DbgPrint(L"\nRangeTableIndex[%d] has %d ranges @ 0x%llx. Total blocks to be uncompressed: %d 0x%x (Size = 0x%x)- ",
+                uint32_t UncompressedPages = RangeTable->GetCompressedBlockIndex(RangeCount);
+                uint32_t CompressedSize = RangeTable->GetCompressedSize();
+                DbgPrint("\nRangeTableIndex[%d] has %d ranges @ 0x%" I64_FORMAT ". Total blocks to be uncompressed: %d 0x%x (Size = 0x%x)\n",
                     RangeTableIndex, RangeCount, RangeTable->GetCompressedBlockOffset(),
                     UncompressedPages, UncompressedPages * PAGE_SIZE,
                     CompressedSize);
@@ -113,15 +124,15 @@ ProcessHiberfil(
 
                 TotalUncompressedPages += UncompressedPages;
 
-                ULONG CompressedPageIndex = 0;
+                uint32_t CompressedPageIndex = 0;
 
-                for (ULONG Index = 0; Index < RangeTable->GetRangeCount(); Index += 1)
+                for (uint32_t Index = 0; Index < RangeTable->GetRangeCount(); Index += 1)
                 {
                     MemoryRangeEntry *Entry = RangeTable->GetRangeEntry(Index);
-                    ULONG64 StartPage = Entry->GetStartPage();
-                    ULONG64 PageCount = Entry->GetPageCount();
+                    uint64_t StartPage = Entry->GetStartPage();
+                    uint64_t PageCount = Entry->GetPageCount();
 
-                    DbgPrint(L"[0x%llx - 0x%llx] CompressedSize = 0x%x\n",
+                    DbgPrint("[0x%" I64_FORMAT " - 0x%" I64_FORMAT "] CompressedSize = 0x%x\n",
                         StartPage * PAGE_SIZE, (StartPage + PageCount) * PAGE_SIZE, RangeTable->GetCompressedSize());
 
                     if (CompressedPageIndex && ((CompressedPageIndex % 0x10) == 0)) CompressedBlock->GetNextCompressedBlock();
@@ -129,7 +140,7 @@ ProcessHiberfil(
                     MEMORY_DESCRIPTOR MemDesc = { 0 };
 
                     MemDesc.IsCompressed = CompressedBlock->IsCompressed();
-                    MemDesc.PageCount = (ULONG)PageCount;
+                    MemDesc.PageCount = (uint32_t)PageCount;
                     MemDesc.Range.Minimum = StartPage * PAGE_SIZE;
                     MemDesc.Range.Maximum = MemDesc.Range.Minimum + (PageCount * PAGE_SIZE);
                     MemDesc.Compressed.XpressHeader = CompressedBlock->GetCompressedBlockOffset();
@@ -143,7 +154,7 @@ ProcessHiberfil(
 
                         if (MemDesc.Compressed.CompressionMethod != XpressFast)
                         {
-                            DbgPrint(L"Compression %d\n", RangeTable->GetCompressMethod());
+                            DbgPrint("Compression %d\n", RangeTable->GetCompressMethod());
                         }
                     }
                     else
@@ -163,8 +174,8 @@ ProcessHiberfil(
                         //
                         // Split required.
                         //
-                        ULONG LastCompressedBlockStartIndex = 0;
-                        for (ULONG PageIndex = 0; PageIndex < PageCount; PageIndex += 1)
+                        uint32_t LastCompressedBlockStartIndex = 0;
+                        for (uint32_t PageIndex = 0; PageIndex < PageCount; PageIndex += 1)
                         {
                             CompressedPageIndex += 1;
 
@@ -202,7 +213,7 @@ ProcessHiberfil(
                     }
                     else
                     {
-                        CompressedPageIndex += (ULONG)PageCount;
+                        CompressedPageIndex += (uint32_t)PageCount;
                         Base->GetMemoryNodes()->InsertNode(StartPage * PAGE_SIZE, &MemDesc);
                     }
 
@@ -215,7 +226,7 @@ ProcessHiberfil(
                     //
                     // No more range table to read.
                     //
-                    if (TotalUncompressedPages) Result = TRUE;
+                    if (TotalUncompressedPages) Result = true;
                     break;
                 }
                 delete CompressedBlock;
@@ -228,17 +239,17 @@ ProcessHiberfil(
         Current;
         Current = Current->GetRightChild())
     {
-        wprintf(L"      -> 0x%I64X-0x%I64X\n", Current->GetKey(), Current->GetKeyObject()->Range.Maximum.QuadPart);
+        printf("      -> 0x%I64X-0x%I64X\n", Current->GetKey(), Current->GetKeyObject()->Range.Maximum.QuadPart);
     }
 #endif
 
     //
     // Windows 10 x86: Dword at [ImageHeader + 0x38] == TotalUncompressedPages
     //
-    wprintf(L"\n  Total pages = 0x%x \n", TotalUncompressedPages);
-    DbgPrint(L"Result = %d\n", Result);
+    printf("\n  Total pages = 0x%x \n", TotalUncompressedPages);
+    DbgPrint("Result = %d\n", Result);
 
-    if (TotalUncompressedPages) Result = TRUE;
+    if (TotalUncompressedPages) Result = true;
 
     *OutMemoryBlock = Base;
 

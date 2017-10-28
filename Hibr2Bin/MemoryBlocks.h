@@ -25,26 +25,26 @@ Revision History:
 #define __MEMORY_BLOCK_H__
 
 typedef struct _ADDRESS_RANGE {
-    ULONG64 Minimum;
-    ULONG64 Maximum;
+    uint64_t Minimum;
+    uint64_t Maximum;
 } ADDRESS_RANGE, *PADDRESS_RANGE;
 
 typedef struct _MEMORY_DESCRIPTOR {
-    BOOL IsCompressed;
-    BOOL NoHeader;
-    ULONG CompressedSize;
+    bool IsCompressed;
+    bool NoHeader;
+    uint32_t CompressedSize;
     union {
         struct {
-            ULONG64 BaseOffset;
+            uint64_t BaseOffset;
         } Uncompressed;
         struct {
-            ULONG64 XpressHeader;
-            ULONG XpressIndex;
-            ULONG CompressionMethod;
+            uint64_t XpressHeader;
+            uint32_t XpressIndex;
+            uint32_t CompressionMethod;
         } Compressed;
     };
     ADDRESS_RANGE Range;
-    ULONG PageCount;
+    uint32_t PageCount;
 } MEMORY_DESCRIPTOR, *PMEMORY_DESCRIPTOR;
 
 class MemoryNode {
@@ -57,7 +57,7 @@ public:
         m_RightChild = Right;
     }
 
-    MemoryNode(MemoryNode *Left, MemoryNode *Right, ULONG64 Key, PMEMORY_DESCRIPTOR Object)
+    MemoryNode(MemoryNode *Left, MemoryNode *Right, uint64_t Key, PMEMORY_DESCRIPTOR Object)
     {
         m_LeftChild = Left;
         m_RightChild = Right;
@@ -73,7 +73,7 @@ public:
         return m_LeftChild;
     }
 
-    VOID SetLeftChild(MemoryNode *Child)
+    void SetLeftChild(MemoryNode *Child)
     {
         m_LeftChild = Child;
     }
@@ -90,7 +90,7 @@ public:
         return NULL;
     }
 
-    VOID SetRightChild(MemoryNode *Child)
+    void SetRightChild(MemoryNode *Child)
     {
         m_RightChild = Child;
     }
@@ -104,7 +104,7 @@ public:
         return Current;
     }
 
-    ULONG64
+    uint64_t
     GetKey()
     {
         return m_Key;
@@ -116,9 +116,9 @@ public:
         return &m_Object;
     }
 
-    BOOLEAN
+    bool
     InsertNode(
-        ULONG64 Key,
+        uint64_t Key,
         PMEMORY_DESCRIPTOR Object
     )
     {
@@ -144,7 +144,7 @@ public:
                     Current->SetRightChild(NewNode);
                     break;
                 }
-            } while (Current = Current->GetLeftChild());
+            } while ((Current = Current->GetLeftChild()));
         }
         else
         {
@@ -168,48 +168,48 @@ public:
 
                     break;
                 }
-            } while (Current = Current->GetRightChild());
+            } while ((Current = Current->GetRightChild()));
         }
 
-        return TRUE;
+        return true;
     }
 
 private:
     MemoryNode *m_LeftChild;
     MemoryNode *m_RightChild;
 
-    ULONG64 m_Key; // VirtualAddress
+    uint64_t m_Key; // VirtualAddress
     MEMORY_DESCRIPTOR m_Object;
 
 };
 
 class MemoryObject {
 public:
-    VOID Init(FileContext *FileContext, ULONG64 FileOffset, ULONG DataSize, BOOLEAN NoAllocationFlag);
+    void Init(FileContext *FileContext, uint64_t FileOffset, uint32_t DataSize, bool NoAllocationFlag);
 
-    MemoryObject(FileContext *FileContext, ULONG64 FileOffset, ULONG DataSize, BOOLEAN NoAllocationFlag)
+    MemoryObject(FileContext *FileContext, uint64_t FileOffset, uint32_t DataSize, bool NoAllocationFlag)
     {
         Init(FileContext, FileOffset, DataSize, NoAllocationFlag);
     }
 
-    MemoryObject(FileContext *FileContext, ULONG64 FileOffset, ULONG DataSize)
+    MemoryObject(FileContext *FileContext, uint64_t FileOffset, uint32_t DataSize)
     {
-        Init(FileContext, FileOffset, DataSize, FALSE);
+        Init(FileContext, FileOffset, DataSize, false);
     }
 
-    BOOLEAN
+    bool
     IsValid() {
         return m_IsObjectValid;
     }
 
-    PVOID
+    void *
     GetData(
     );
 
-    PVOID
+    void *
     GetData(
-        ULONG64 FileOffset,
-        ULONG DataSize
+        uint64_t FileOffset,
+        uint32_t DataSize
     );
 
     ~MemoryObject()
@@ -219,11 +219,11 @@ public:
 
 private:
     FileContext *m_FileContext = NULL;
-    ULONG64 m_FileBaseOffset;
-    PVOID m_Data = NULL;
-    ULONG m_DataSize;
-    BOOLEAN m_IsObjectValid = FALSE;
-    BOOLEAN m_NoAllocationFlag = FALSE;
+    uint64_t m_FileBaseOffset;
+    uint8_t *m_Data = NULL;
+    uint32_t m_DataSize;
+    bool m_IsObjectValid = false;
+    bool m_NoAllocationFlag = false;
 };
 
 #define XPRESS_ENCODE_MAGIC 0x19880922
@@ -238,71 +238,71 @@ private:
 class CompressedMemoryBlock {
 public:
 
-    VOID
+    void
     Init(
         FileContext *FileContext,
-        ULONG64 Offset,
-        BOOLEAN NoAllocationFlag
+        uint64_t Offset,
+        bool NoAllocationFlag
     );
 
     CompressedMemoryBlock(
         FileContext *FileContext,
-        ULONG64 Offset
+        uint64_t Offset
     )
     {
-        Init(FileContext, Offset, FALSE);
+        Init(FileContext, Offset, false);
     }
 
     CompressedMemoryBlock(
         FileContext *FileContext,
-        ULONG64 Offset,
-        BOOLEAN NoAllocationFlag
+        uint64_t Offset,
+        bool NoAllocationFlag
     )
     {
         Init(FileContext, Offset, NoAllocationFlag);
     }
 
-    VOID
+    void
     SetCompressedBlock(
-        PVOID CompressedData
+        void *CompressedData
     );
 
-    VOID SetCompressionSize(ULONG CompressionSize) { m_CompressedSize = CompressionSize; }
-    BOOLEAN SetCompressionType(BOOLEAN IsCompressed) { m_IsCompressed = IsCompressed; return m_IsCompressed; }
-    BOOLEAN IsCompressed() { return m_IsCompressed; }
+    void SetCompressionSize(uint32_t CompressionSize) { m_CompressedSize = CompressionSize; }
+    bool SetCompressionType(bool IsCompressed) { m_IsCompressed = IsCompressed; return m_IsCompressed; }
+    bool IsCompressed() { return m_IsCompressed; }
 
-    ULONG64 GetCompressedBlockOffset() { return m_CompressedBlockOffset; }
+    uint64_t GetCompressedBlockOffset() { return m_CompressedBlockOffset; }
 
-    ULONG
+    uint32_t
     Xpress_Decompress(
-        PUCHAR InputBuffer,
-        ULONG InputSize,
-        PUCHAR OutputBuffer,
-        ULONG OutputSize
+        uint8_t *InputBuffer,
+        uint32_t InputSize,
+        uint8_t *OutputBuffer,
+        uint32_t OutputSize
     );
 
-    VOID SetContext(FileContext *FileContext) { m_FileContext = FileContext; }
+    void SetContext(FileContext *FileContext) { m_FileContext = FileContext; }
     FileContext *GetContext() { return m_FileContext; }
 
-    PVOID
+    void *
     GetDecompressedData(
     );
 
-    PVOID
+    void *
     GetDecompressedPage(
     );
 
-    VOID
+    void
     GetNextCompressedBlock(
     );
 
-    ULONG
+    uint32_t
     GetCompressedBlockSize() { return /* m_CompressedHeaderSize + */ m_CompressedSize; }
 
-    ULONG
+    uint32_t
     GetCompressedHeaderSize() { return m_CompressedHeaderSize; }
 
-    VOID
+    void
     DestroyUncompressedBlock(
     )
     {
@@ -310,7 +310,7 @@ public:
         m_UncompressedData = NULL;
     }
 
-    VOID
+    void
     DestroyCompressedBlock()
     {
         if (m_CompressedBlock) delete m_CompressedBlock;
@@ -324,22 +324,22 @@ public:
     }
 
 private:
-    PUCHAR m_CompressedData = NULL;
-    PUCHAR m_UncompressedData = NULL;
-    ULONG m_CompressedHeaderSize = 0;
-    ULONG m_CompressedSize = 0;
-    ULONG m_NumberOfUncompressedPages = 0;
-    ULONG m_MaxDataLength = 0; // 64KB + 4KB
-    BOOLEAN m_IsCompressed = FALSE;
+    uint8_t *m_CompressedData = NULL;
+    uint8_t *m_UncompressedData = NULL;
+    uint32_t m_CompressedHeaderSize = 0;
+    uint32_t m_CompressedSize = 0;
+    uint32_t m_NumberOfUncompressedPages = 0;
+    uint32_t m_MaxDataLength = 0; // 64KB + 4KB
+    bool m_IsCompressed = false;
 
-    ULONG m_UncompressedPageIndex = 0;
+    uint32_t m_UncompressedPageIndex = 0;
 
     FileContext *m_FileContext = NULL;
     MemoryObject *m_CompressedBlock = NULL;
-    ULONG64 m_CompressedBlockOffset = 0;
-    ULONG64 m_CurrentOffset = 0;
+    uint64_t m_CompressedBlockOffset = 0;
+    uint64_t m_CurrentOffset = 0;
 
-    BOOLEAN m_NoAllocationFlag = FALSE;
+    bool m_NoAllocationFlag = false;
 };
 
 
@@ -348,7 +348,7 @@ class MemoryRangeEntry {
 public:
     MemoryRangeEntry(
         FileContext *FileContext,
-        PVOID Range
+        void *Range
     )
     {
         m_FileContext = FileContext;
@@ -357,17 +357,17 @@ public:
 
     FileContext *GetContext() { return m_FileContext; }
 
-    ULONG64
+    uint64_t
         GetPageCount(
         );
 
-    ULONG64
+    uint64_t
         GetStartPage(
         );
 
 private:
-    ULONG64 m_CurrentOffset = 0;
-    PVOID m_MemoryRangeEntry = NULL;
+    uint64_t m_CurrentOffset = 0;
+    void *m_MemoryRangeEntry = NULL;
     FileContext *m_FileContext;
 };
 
@@ -376,7 +376,7 @@ class MemoryRangeTable {
 public:
     MemoryRangeTable(
         FileContext *Context,
-        ULONG64 RangeTable
+        uint64_t RangeTable
     )
     {
         m_FileContext = Context;
@@ -385,15 +385,15 @@ public:
         m_MemoryRangeTable = new MemoryObject(GetContext(), m_CurrentOffset, m_MemoryRangeTableSize);
     }
 
-    BOOLEAN IsValid() { return m_MemoryRangeTable->IsValid(); }
+    bool IsValid() { return m_MemoryRangeTable->IsValid(); }
 
     FileContext *GetContext() { return m_FileContext; }
 
-    ULONG
+    uint32_t
     GetRangeCount(
     );
 
-    ULONG
+    uint32_t
     GetCompressedSize(
     );
 
@@ -401,35 +401,35 @@ public:
     GetCompressMethod(
     );
 
-    PVOID
+    void *
     GetRangeBase(
     );
 
-    BOOLEAN
+    bool
     GetNextRangeTable(
     );
 
     MemoryRangeEntry *
     GetRangeEntry(
-        _In_ ULONG Index
+        _In_ uint32_t Index
     );
 
-    ULONG
+    uint32_t
     GetCompressedBlockIndex(
-        _In_ ULONG RangeIndex
+        _In_ uint32_t RangeIndex
     );
 
-    ULONG
+    uint32_t
     GetMemoryRangeEntrySize(
     );
 
-    ULONG
+    uint32_t
     GetMemoryRangeTableSize(
     );
 
-    ULONG64 GetMemoryRangeTableOffset() { return m_CurrentOffset; }
+    uint64_t GetMemoryRangeTableOffset() { return m_CurrentOffset; }
 
-    ULONG64
+    uint64_t
     GetCompressedBlockOffset(
     );
 
@@ -440,33 +440,33 @@ public:
 
 private:
     FileContext *m_FileContext;
-    ULONG64 m_CurrentOffset = 0;
+    uint64_t m_CurrentOffset = 0;
     MemoryObject *m_MemoryRangeTable;
-    ULONG m_MemoryRangeTableSize = PAGE_SIZE + (PAGE_SIZE * 0x10);
+    uint32_t m_MemoryRangeTableSize = PAGE_SIZE + (PAGE_SIZE * 0x10);
 };
 
 class MemoryBlock
 {
 public:
-    MemoryBlock(PlatformType Platform, ULONG Major, ULONG Minor)
+    MemoryBlock(PlatformType Platform, uint32_t Major, uint32_t Minor)
     {
         m_FileContext = new FileContext(Platform, Major, Minor);
     }
 
     FileContext * GetContext() { return m_FileContext; }
 
-    ULONG GetSignature();
+    uint32_t GetSignature();
 
-    VOID
-    SetInitialOffset(ULONG64 Offset) { m_InitialOffset = Offset; }
+    void
+    SetInitialOffset(uint64_t Offset) { m_InitialOffset = Offset; }
 
-    ULONG64
+    uint64_t
     GetInitialOffset(
     );
 
-    ULONG64
+    uint64_t
     GetFirstKernelRestorePage(
-        VOID
+        void
         );
 
     MemoryRangeTable *GetFirstRangeTable() { return new MemoryRangeTable(GetContext(), m_InitialOffset); }
@@ -474,7 +474,7 @@ public:
     MemoryNode *GetMemoryNodes() { return m_MemoryNodes; }
 
 private:
-    ULONG64 m_InitialOffset = 0;
+    uint64_t m_InitialOffset = 0;
     FileContext *m_FileContext = NULL;
     MemoryNode *m_MemoryNodes = new MemoryNode(NULL, NULL);
 };

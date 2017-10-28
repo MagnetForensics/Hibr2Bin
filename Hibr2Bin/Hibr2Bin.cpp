@@ -27,103 +27,103 @@ Revision History:
 #define COMAE_TOOLKIT_VERSION "3.0.0.undefined"
 #endif
 
-VOID
+void
 Help()
 {
-    wprintf(L"Usage: Hibr2Bin [Options] /INPUT <FILENAME> /OUTPUT <FILENAME>\n\n");
-    wprintf(L"Description:\n"
-            L"  Enables users to uncompress Windows hibernation file.\n\n");
+    printf("Usage: Hibr2Bin [Options] /INPUT <FILENAME> /OUTPUT <FILENAME>\n\n");
+    printf("Description:\n"
+            "  Enables users to uncompress Windows hibernation file.\n\n");
 
-    wprintf(L"Options:\n"
-            L"  /PLATFORM, /P         Select platform (X64 or X86)\n"
-            L"  /MAJOR, /V            Select major version (e.g. 6 for NT 6.1\n"
-            L"  /MINOR, /M            Select minor version (e.g. 1 for NT 6.1)\n"
-            L"  /OFFSET, /L           Data offset in hexadecimal (optional)\n"
-            L"  /INPUT, /I            Input hiberfil.sys file.\n"
-            L"  /OUTPUT, /O           Output hiberfil.sys file.\n\n");
+    printf("Options:\n"
+            "  /PLATFORM, /P         Select platform (X64 or X86)\n"
+            "  /MAJOR, /V            Select major version (e.g. 6 for NT 6.1\n"
+            "  /MINOR, /M            Select minor version (e.g. 1 for NT 6.1)\n"
+            "  /OFFSET, /L           Data offset in hexadecimal (optional)\n"
+            "  /INPUT, /I            Input hiberfil.sys file.\n"
+            "  /OUTPUT, /O           Output hiberfil.sys file.\n\n");
 
-    wprintf(L"Versions:\n"
-            L"  /MAJOR 5 /MINOR 1     Windows XP\n"
-            L"  /MAJOR 5 /MINOR 2     Windows XP x64, Windows 2003 R2\n"
-            L"  /MAJOR 6 /MINOR 0     Windows Vista, Windows Server 2008\n"
-            L"  /MAJOR 6 /MINOR 1     Windows 7, Windows Server 2008 R2\n"
-            L"  /MAJOR 6 /MINOR 2     Windows 8, Windows Server 2012\n"
-            L"  /MAJOR 6 /MINOR 3     Windows 8.1, Windows Server 2012 R2\n"
-            L"  /MAJOR 10 /MINOR 0    Windows 10, Windows Server 2017\n\n");
+    printf("Versions:\n"
+            "  /MAJOR 5 /MINOR 1     Windows XP\n"
+            "  /MAJOR 5 /MINOR 2     Windows XP x64, Windows 2003 R2\n"
+            "  /MAJOR 6 /MINOR 0     Windows Vista, Windows Server 2008\n"
+            "  /MAJOR 6 /MINOR 1     Windows 7, Windows Server 2008 R2\n"
+            "  /MAJOR 6 /MINOR 2     Windows 8, Windows Server 2012\n"
+            "  /MAJOR 6 /MINOR 3     Windows 8.1, Windows Server 2012 R2\n"
+            "  /MAJOR 10 /MINOR 0    Windows 10, Windows Server 2017\n\n");
 
-    wprintf(L"Examples:\n\n");
+    printf("Examples:\n\n");
 
-    wprintf(L"  Uncompress a Windows 7 (NT 6.1) x64 hibernation file:\n"
-            L"      Hibr2Bin /PLATFORM X64 /MAJOR 6 /MINOR 1 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n\n"
-            L"  Uncompress a Windows 10 (NT 10.0) x86 hibernation file:\n"
-            L"      Hibr2Bin /PLATFORM X86 /MAJOR 10 /MINOR 0 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n");
+    printf("  Uncompress a Windows 7 (NT 6.1) x64 hibernation file:\n"
+            "      Hibr2Bin /PLATFORM X64 /MAJOR 6 /MINOR 1 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n\n"
+            "  Uncompress a Windows 10 (NT 10.0) x86 hibernation file:\n"
+            "      Hibr2Bin /PLATFORM X86 /MAJOR 10 /MINOR 0 /INPUT hiberfil.sys /OUTPUT uncompressed.bin\n");
 }
 
-BOOLEAN
+bool
 Parse(
-    ULONG MaxArg,
-    LPWSTR *argv,
+    uint32_t MaxArg,
+    char * *argv,
     PPROGRAM_ARGUMENTS Arguments
 )
 {
-    ULONG Index = 1;
+    uint32_t Index = 1;
 
     while (Index < MaxArg)
     {
-        if ((argv[Index][0] == L'/') || (argv[Index][0] == L'-'))
+        if ((argv[Index][0] == '/') || (argv[Index][0] == '-'))
         {
-            if ((_wcsicmp(argv[Index], L"/PLATFORM") == 0) || (_wcsicmp(argv[Index], L"/P") == 0))
+            if ((stricmp(argv[Index], "/PLATFORM") == 0) || (stricmp(argv[Index], "/P") == 0))
             {
                 Index++;
 
-                Arguments->HasPlatform = TRUE; 
-                if (_wcsicmp(argv[Index], L"X86") == 0) Arguments->Platform = PlatformX86;
-                else if (_wcsicmp(argv[Index], L"X64") == 0) Arguments->Platform = PlatformX64;
+                Arguments->HasPlatform = true; 
+                if (stricmp(argv[Index], "X86") == 0) Arguments->Platform = PlatformX86;
+                else if (stricmp(argv[Index], "X64") == 0) Arguments->Platform = PlatformX64;
                 else
                 {
-                    Arguments->HasPlatform = FALSE;
+                    Arguments->HasPlatform = false;
                 }
             }
-            else if ((_wcsicmp(argv[Index], L"/MAJOR") == 0) || (_wcsicmp(argv[Index], L"/V") == 0))
+            else if ((stricmp(argv[Index], "/MAJOR") == 0) || (stricmp(argv[Index], "/V") == 0))
             {
                 Index++;
 
-                Arguments->MajorVersion = _wtoi(argv[Index]);
-                Arguments->HasMajorVersion = TRUE;
+                Arguments->MajorVersion = atoi(argv[Index]);
+                Arguments->HasMajorVersion = true;
             }
-            else if ((_wcsicmp(argv[Index], L"/MINOR") == 0) || (_wcsicmp(argv[Index], L"/M") == 0))
+            else if ((stricmp(argv[Index], "/MINOR") == 0) || (stricmp(argv[Index], "/M") == 0))
             {
                 Index++;
 
-                Arguments->MinorVersion = _wtoi(argv[Index]);
-                Arguments->HasMinorVersion = TRUE;
+                Arguments->MinorVersion = atoi(argv[Index]);
+                Arguments->HasMinorVersion = true;
             }
-            else if ((_wcsicmp(argv[Index], L"/OFFSET") == 0) || (_wcsicmp(argv[Index], L"/L") == 0))
+            else if ((stricmp(argv[Index], "/OFFSET") == 0) || (stricmp(argv[Index], "/") == 0))
             {
-                LPWSTR p;
+                char * p;
                 Index++;
 
-                Arguments->DataOffset = wcstol(argv[Index], &p, 16);
-                Arguments->HasDataOffset = TRUE;
+                Arguments->DataOffset = strtol(argv[Index], &p, 16);
+                Arguments->HasDataOffset = true;
             }
-            else if ((_wcsicmp(argv[Index], L"/INPUT") == 0) || (_wcsicmp(argv[Index], L"/I") == 0))
+            else if ((stricmp(argv[Index], "/INPUT") == 0) || (stricmp(argv[Index], "/I") == 0))
             {
                 Index++;
                 Arguments->FileName = argv[Index];
             }
-            else if ((_wcsicmp(argv[Index], L"/OUTPUT") == 0) || (_wcsicmp(argv[Index], L"/O") == 0))
+            else if ((stricmp(argv[Index], "/OUTPUT") == 0) || (stricmp(argv[Index], "/O") == 0))
             {
                 Index++;
                 Arguments->OutFileName = argv[Index];
             }
-            else if ((_wcsicmp(argv[Index], L"/?") == 0) || (_wcsicmp(argv[Index], L"/HELP") == 0))
+            else if ((stricmp(argv[Index], "/?") == 0) || (stricmp(argv[Index], "/HELP") == 0))
             {
-                return FALSE;
+                return false;
             }
             else
             {
-                wprintf(L"  Error: Invalid parameter.\n");
-                return FALSE;
+                printf("  Error: Invalid parameter.\n");
+                return false;
             }
         }
 
@@ -134,11 +134,11 @@ Parse(
     // Validate parameters.
     //
 
-    if (!Arguments->HasPlatform) wprintf(L"  Error: Please provide a platform type using /P.\n");
-    if (!Arguments->HasMajorVersion) wprintf(L"  Error: Please provide a major version using /V parameter.\n");
-    if (!Arguments->HasMinorVersion) wprintf(L"  Error: Please provide a minor version using /M parameter.\n");
+    if (!Arguments->HasPlatform) printf("  Error: Please provide a platform type using /P.\n");
+    if (!Arguments->HasMajorVersion) printf("  Error: Please provide a major version using /V parameter.\n");
+    if (!Arguments->HasMinorVersion) printf("  Error: Please provide a minor version using /M parameter.\n");
 
-    if (!Arguments->HasMajorVersion || !Arguments->HasMinorVersion || !Arguments->HasPlatform) return FALSE;
+    if (!Arguments->HasMajorVersion || !Arguments->HasMinorVersion || !Arguments->HasPlatform) return false;
 
     // Known versions of Windows: http://www.codeproject.com/Articles/678606/Part-Overcoming-Windows-s-deprecation-of-GetVe
     if (Arguments->MajorVersion == 10)
@@ -148,8 +148,8 @@ Parse(
         //
         if (Arguments->MinorVersion != 0)
         {
-            wprintf(L"  Error: Unsupported target version.");
-            return FALSE;
+            printf("  Error: Unsupported target version.");
+            return false;
         }
     }
     else if (Arguments->MajorVersion == 6)
@@ -160,8 +160,8 @@ Parse(
         if ((Arguments->MinorVersion != 3) && (Arguments->MinorVersion != 2) &&
             (Arguments->MinorVersion != 1) && (Arguments->MinorVersion != 0))
         {
-            wprintf(L"  Error: Unsupported target version.");
-            return FALSE;
+            printf("  Error: Unsupported target version.");
+            return false;
         }
     }
     else if (Arguments->MajorVersion == 5)
@@ -172,30 +172,31 @@ Parse(
         if (((Arguments->MinorVersion != 2) && (Arguments->Platform != PlatformX64)) ||
             ((Arguments->MinorVersion != 1) && (Arguments->Platform != PlatformX86)))
         {
-            wprintf(L"  Error: Unsupported target version.");
-            return FALSE;
+            printf("  Error: Unsupported target version.");
+            return false;
         }
     }
 
-    return TRUE;
+    return true;
 }
 
-BOOLEAN
+bool
 IsLicenseValid()
 {
+#if 0
     SYSTEMTIME SystemTime = { 0 };
 
     GetLocalTime(&SystemTime);
-#if 0
+
     if (!((SystemTime.wYear == 2017) && (SystemTime.wMonth == 6)))
     {
-        return FALSE;
+        return false;
     }
 #endif
-    return TRUE;
+    return true;
 }
 
-LPWSTR
+const char *
 GetPlatformType(
     PlatformType Type
 )
@@ -203,47 +204,47 @@ GetPlatformType(
     switch (Type)
     {
         case PlatformX86:
-            return L"X86";
+            return "X86";
         case PlatformX64:
-            return L"X64";
+            return "X64";
     }
 
-    return L"Unknown";
+    return "Unknown";
 }
 
 int 
-wmain(
-    ULONG argc, 
-    LPWSTR *argv
+main(
+    int argc, 
+    char * *argv
 )
 {
     PROGRAM_ARGUMENTS Arguments = { 0 };
 
-    wprintf(L"\n"
-            L"  Hibr2Bin %S\n"
-            L"  Copyright (C) 2007 - 2017, Matthieu Suiche <http://www.msuiche.net>\n"
-            L"  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
-            L"  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n\n",
+    printf("\n"
+            "  Hibr2Bin %s\n"
+            "  Copyright (C) 2007 - 2017, Matthieu Suiche <http://www.msuiche.net>\n"
+            "  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
+            "  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n\n",
             COMAE_TOOLKIT_VERSION);
 
     if ((argc < 2) || !Parse(argc, argv, &Arguments))
     {
         Help();
-        return FALSE;
+        return false;
     }
 
     if (!IsLicenseValid())
     {
-        Red(L"  Error: Beta program expired. Get the latest version on www.comae.io \n");
-        return FALSE;
+        Red("  Error: Beta program expired. Get the latest version on www.comae.io \n");
+        return false;
     }
 
-    wprintf(L"  In File:    %s\n", Arguments.FileName);
-    wprintf(L"  Out File:    %s\n", Arguments.OutFileName);
-    wprintf(L"  Target Version: Microsoft Windows NT %d.%d (%s)\n", Arguments.MajorVersion, Arguments.MinorVersion, GetPlatformType(Arguments.Platform));
+    printf("  In File:     %s\n", Arguments.FileName);
+    printf("  Out File:    %s\n", Arguments.OutFileName);
+    printf("  Target Version: Microsoft Windows NT %d.%d (%s)\n", Arguments.MajorVersion, Arguments.MinorVersion, GetPlatformType(Arguments.Platform));
 
     MemoryBlock *MemoryBlocks = NULL;
-    BOOLEAN Result = FALSE;
+    bool Result = false;
 
     if (ProcessHiberfil(&Arguments, &MemoryBlocks))
     {

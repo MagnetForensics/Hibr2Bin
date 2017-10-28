@@ -21,7 +21,7 @@ Revision History:
 
 --*/
 
-BOOLEAN
+bool
 ProcessHiberfil(
     _In_ PPROGRAM_ARGUMENTS Vars,
     _Out_ MemoryBlock **OutMemoryBlock
