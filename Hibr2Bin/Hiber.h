@@ -3,6 +3,7 @@
 Copyright (c) 2007 - 2017, Matthieu Suiche
 Copyright (c) 2012 - 2014, MoonSols Limited
 Copyright (c) 2015 - 2017, Comae Technologies FZE
+Copyright (c) 2017 - 2018, Comae Technologies DMCC
 
 Module Name:
 
