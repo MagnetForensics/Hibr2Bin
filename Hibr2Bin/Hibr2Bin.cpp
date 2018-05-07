@@ -224,7 +224,7 @@ wmain(
             L"  Hibr2Bin %S\n"
             L"  Copyright (C) 2007 - 2017, Matthieu Suiche <http://www.msuiche.net>\n"
             L"  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
-            L"  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n",
+            L"  Copyright (C) 2015 - 2017, Comae Technologies FZE <http://www.comae.io>\n"
             L"  Copyright (C) 2017 - 2018, Comae Technologies DMCC <http://www.comae.io>\n\n",
             COMAE_TOOLKIT_VERSION);
 
