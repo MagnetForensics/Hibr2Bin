@@ -67,11 +67,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Comae Technologies FZE"
+            VALUE "CompanyName", "Comae Technologies DMCC"
             VALUE "FileDescription", "Windows hibernation file decompressor."
             VALUE "FileVersion", "3.0.0.0"
             VALUE "InternalName", "Hibr2Bin.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2017 Comae Technologies FZE"
+            VALUE "LegalCopyright", "Copyright (C) 2017 Comae Technologies DMCC"
             VALUE "OriginalFilename", "Hibr2Bin.exe"
             VALUE "ProductName", "Comae Toolkit"
             VALUE "ProductVersion", "3.0.0.0"
