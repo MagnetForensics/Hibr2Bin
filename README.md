@@ -1,4 +1,4 @@
-Get the compiled version as part of **Comae Toolkit**, register on: https://my.comae.io
+Get the compiled version as part of **Comae Toolkit**.
 
 # Hibr2Bin
 Comae Hibernation File Decompressor (SANDMAN project)
