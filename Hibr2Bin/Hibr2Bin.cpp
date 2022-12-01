@@ -224,8 +224,8 @@ wmain(
             L"  Hibr2Bin %S\n"
             L"  Copyright (C) 2007 - 2021, Matthieu Suiche <http://www.msuiche.net>\n"
             L"  Copyright (C) 2012 - 2014, MoonSols Limited <http://www.moonsols.com>\n"
-            L"  Copyright (C) 2016 - 2021, Comae Technologies DMCC <http://www.comae.io>\n",
-            L"  Copyright (c) 2022, Magnet Forensics, Inc. <https://www.magnetforensics.com/>\n\n"
+            L"  Copyright (C) 2016 - 2021, Comae Technologies DMCC <http://www.comae.io>\n"
+            L"  Copyright (c) 2022, Magnet Forensics, Inc. <https://www.magnetforensics.com/>\n\n",
             COMAE_TOOLKIT_VERSION);
 
     if ((argc < 2) || !Parse(argc, argv, &Arguments))
