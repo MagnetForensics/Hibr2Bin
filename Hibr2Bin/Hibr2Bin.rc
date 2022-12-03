@@ -67,14 +67,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Comae Technologies DMCC"
+            VALUE "CompanyName", "Magnet Forensics, Inc."
             VALUE "FileDescription", "Windows hibernation file decompressor."
-            VALUE "FileVersion", "3.0.0.0"
+            VALUE "FileVersion", "3.1.0.0"
             VALUE "InternalName", "Hibr2Bin.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2017 Comae Technologies DMCC"
+            VALUE "LegalCopyright", "Copyright (C) 2022 Magnet Forensics, Inc."
             VALUE "OriginalFilename", "Hibr2Bin.exe"
             VALUE "ProductName", "Comae Toolkit"
-            VALUE "ProductVersion", "3.0.0.0"
+            VALUE "ProductVersion", "3.1.0.0"
         END
     END
     BLOCK "VarFileInfo"
