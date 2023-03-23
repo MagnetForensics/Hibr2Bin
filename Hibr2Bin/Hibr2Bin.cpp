@@ -50,7 +50,7 @@ Help()
             L"  /MAJOR 6 /MINOR 1     Windows 7, Windows Server 2008 R2\n"
             L"  /MAJOR 6 /MINOR 2     Windows 8, Windows Server 2012\n"
             L"  /MAJOR 6 /MINOR 3     Windows 8.1, Windows Server 2012 R2\n"
-            L"  /MAJOR 10 /MINOR 0    Windows 10, Windows Server 2017\n\n");
+            L"  /MAJOR 10 /MINOR 0    Windows 10, Windows Server 2016\n\n");
 
     wprintf(L"Examples:\n\n");
 
