@@ -11,10 +11,10 @@ SandMan initially started as an open-source project, but in 2008 a German compan
 2017 is now here, and I thought it would be a good way to start the year by open sourcing the current version of Hibr2Bin which also had been recently documented [5] by Joe T. Sylve, Vico Marziale, Golden G. Richard III.
 
 - [1] http://www.msuiche.net/2007/12/06/enter-sandman-japan-pacsec-2007/
-- [2] http://lists.volatilesystems.com/pipermail/vol-users/2009-July/000111.html
-- [3] http://computer.forensikblog.de/en/2008/04/the-3-vendors.html
+- [2] [http://lists.volatilesystems.com/pipermail/vol-users/2009-July/000111.html](https://web.archive.org/web/20100728094216/http://lists.volatilesystems.com/pipermail/vol-users/2009-July/000111.html)
+- [3] [http://computer.forensikblog.de/en/2008/04/the-3-vendors.html](https://web.archive.org/web/20170223082318/http://computer.forensikblog.de/en/2008/04/the-3-vendors.html)
 - [4] http://www.msuiche.net/2008/04/03/x-ways-forensics-beta-2-and-hibernation-file/
-- [5] https://www.504ensics.com/uploads/publications/modern-windows-hibernation.pdf
+- [5] [https://www.504ensics.com/uploads/publications/modern-windows-hibernation.pdf](https://web.archive.org/web/20161230152118/https://www.504ensics.com/uploads/publications/modern-windows-hibernation.pdf)
 
 ## Usage
 
